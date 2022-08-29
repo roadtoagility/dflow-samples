@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoManager.Tests", "TodoManager.Tests\TodoManager.Tests.csproj", "{47FF6D84-A177-476A-8D23-0A1C42255FB0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoManagerApp", "TodoManagerApp\TodoManagerApp.csproj", "{EEB9F922-460A-4CB3-BC08-9B2D7B7050C2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{47FF6D84-A177-476A-8D23-0A1C42255FB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47FF6D84-A177-476A-8D23-0A1C42255FB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47FF6D84-A177-476A-8D23-0A1C42255FB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47FF6D84-A177-476A-8D23-0A1C42255FB0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEB9F922-460A-4CB3-BC08-9B2D7B7050C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEB9F922-460A-4CB3-BC08-9B2D7B7050C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEB9F922-460A-4CB3-BC08-9B2D7B7050C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEB9F922-460A-4CB3-BC08-9B2D7B7050C2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
