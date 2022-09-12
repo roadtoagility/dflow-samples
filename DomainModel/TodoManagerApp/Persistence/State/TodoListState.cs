@@ -1,4 +1,11 @@
 namespace TodoManagerApp.Persistence.State;
 
-public sealed record TodoListState(IList<TodoState> Todos, Guid StateId, DateTime CreateAt, byte[] RowVersion)
-    : State(StateId, CreateAt, RowVersion);
+public sealed record TodoListState
+{
+    public string Name { get; set; }
+    
+    public int Id { get; set; }
+    public ICollection<TodoState> Todos { get; set; }
+    public bool IsDeleted { get; set; }
+    public byte[] RowVersion { get; set; }
+}

@@ -6,43 +6,43 @@
 
 using DFlow.Business.Cqrs;
 using DFlow.Business.Cqrs.CommandHandlers;
-using DFlow.Domain.Validation;
 using DFlow.Persistence;
 using TodoManagerApp.Domain;
 using TodoManagerApp.Persistence.Repositories;
 
 namespace TodoManagerApp.Business;
 
-public sealed class CreateTodoListHandler:ICommandHandler<CreateTodoList,CommandResult>
+public sealed class CreateTodoHandler:ICommandHandler<CreateTodo,CommandResult>
 {
     private readonly IDbSession<ITodoListRepository> _sessionDb;
-    public CreateTodoListHandler(IDbSession<ITodoListRepository> sessionDb)
+    public CreateTodoHandler(IDbSession<ITodoListRepository> sessionDb)
     {
         this._sessionDb = sessionDb;
     }
 
-    public Task<CommandResult> Execute(CreateTodoList command)
+    public Task<CommandResult> Execute(CreateTodo command)
     {
         return Execute(command, CancellationToken.None);
     }
 
-    public async Task<CommandResult> Execute(CreateTodoList command, CancellationToken cancellationToken)
+    public async Task<CommandResult> Execute(CreateTodo command, CancellationToken cancellationToken)
     {
         if (command.IsValid)
         {
-            var list = TodoList.EmptyTodoList(TodoListName.From(command.ListName), TodoListId.From(1));
+            TodoList todolist = await this._sessionDb.Repository
+                .GetById(command.ListId, cancellationToken);
+            
+            todolist.AddTodo(command.Description);
 
-            if (list.IsValid)
+            if (todolist.IsValid)
             {
-                await this._sessionDb.Repository.Add(list);
+                await this._sessionDb.Repository.Add(todolist);
                 await this._sessionDb.SaveChangesAsync(cancellationToken);
                 
-                return new CommandResult(command.IsValid, list.Identity.Value);
+                return new CommandResult(todolist.IsValid, todolist.Identity.Value);
             }
-            
-            return new CommandResult(list.IsValid, list.Failures);    
+            return new CommandResult(todolist.IsValid, todolist.Failures);    
         }
-        
         return new CommandResult(command.IsValid, command.Failures);
     }
 }

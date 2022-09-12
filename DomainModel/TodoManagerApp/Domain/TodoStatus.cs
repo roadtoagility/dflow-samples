@@ -8,6 +8,8 @@ using DFlow.Domain.BusinessObjects;
 
 namespace TodoManagerApp.Domain;
 
-public class TodoListId : ValueOf<int, TodoListId>
+public class TodoStatus : ValueOf<bool, TodoStatus>
 {
+    public static TodoStatus NotDone => From(false);
+    public static TodoStatus Done => From(true);
 }

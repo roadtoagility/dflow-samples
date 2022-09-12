@@ -1,5 +1,5 @@
 namespace TodoManagerApp.Persistence.State;
 
-public sealed record TodoState(string Description, bool IsDone, Guid StateId, DateTime CreateAt, byte[] RowVersion)
-    : State(StateId, CreateAt, RowVersion);
+public sealed record TodoState(int TodoStateId, string Description, bool IsDone, byte[] RowVersion)
+    : State(RowVersion);
 
