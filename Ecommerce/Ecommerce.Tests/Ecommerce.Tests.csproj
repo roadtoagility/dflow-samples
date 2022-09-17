@@ -24,7 +24,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\EcommerceWebAPI\EcommerceAPI.csproj" />
       <ProjectReference Include="..\Ecommerce\Ecommerce.csproj" />
     </ItemGroup>
 
