@@ -1,40 +1,21 @@
-// Copyright (C) 2022  Road to Agility
-//
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at https://mozilla.org/MPL/2.0/.
-
-
-using Ecommerce.Business.Extensions;
-using Ecommerce.Persistence;
-using Ecommerce.Persistence.ExtensionMethods;
-using EcommerceAPI.ApiEndpoints;
-using Microsoft.AspNetCore.Http.Json;
-using Microsoft.EntityFrameworkCore;
-
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddDbContext<EcommerceAppDbContext>((options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("ModelConnection"))));
-
-builder.Services.AddRepositories();
-builder.Services.AddCommandHandlers();
-builder.Services.AddMediatorOperations();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.Configure<JsonOptions>(o =>
+namespace EcommerceWebAPI
 {
-    o.SerializerOptions.IgnoreReadOnlyProperties = true;
-});
-var app = builder.Build();
+    public static class Program
+    {
+        public static async Task Main(string[] args)
+        {
+            await CreateHostBuilder(args).Build().RunAsync();
+        }
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
+        static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            return Host.CreateDefaultBuilder(args)
+                .ConfigureLogging(logging =>
+                {
+                    logging.ClearProviders();
+                    logging.AddConsole();
+                })
+                .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
+        }
+    }
 }
-
-EndpointRoutes.StateChangeApis(app);
-
-app.Run();

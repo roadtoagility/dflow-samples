@@ -7,7 +7,6 @@
 using Ecommerce.Persistence.Mappings;
 using Ecommerce.Persistence.State;
 using Microsoft.EntityFrameworkCore;
-using TodoManagerApp.Persistence;
 
 namespace Ecommerce.Persistence;
 

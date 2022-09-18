@@ -8,13 +8,13 @@ using DFlow.Business.Cqrs.CommandHandlers;
 using Ecommerce.Business;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EcommerceWebApi.ApiEndpoints;
+namespace EcommerceWebApp.ApiEndpoints;
 
 public static class EndpointRoutes
 {
     public static void StateChangeApis(WebApplication app)
     {
-        app.MapPost("/api/lists", async ([FromBody]CreateProduct command
+        app.MapPost("/api/v1/products", async ([FromBody]CreateProduct command
             ,ICommandHandler<CreateProduct, CommandResult> handler) =>
         {
             if (command.IsValid == false)
@@ -31,22 +31,9 @@ public static class EndpointRoutes
             return Results.Ok(result);
         });
 
-        app.MapPut("/api/lists/{todoListId}/todos",
-            async (CreateProduct todo, ICommandHandler<CreateProduct, CommandResult> handler) =>
-            {
-                if (todo.IsValid == false)
-                {
-                    Results.BadRequest(todo.Failures);
-                }
-
-                var result = await handler.Execute(todo);
-
-                if (result.IsSucceed == false)
-                {
-                    Results.BadRequest(todo.Failures);
-                }
-                    
-                return Results.Ok(result);
-            });
+        app.MapGet("/api/v1/products", (int pageNum, int pageSize) =>
+        {
+            return Results.Ok("");
+        });
     }
 }

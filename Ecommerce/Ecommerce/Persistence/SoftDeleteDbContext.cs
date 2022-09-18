@@ -1,4 +1,4 @@
-// Copyright (C) 2020  Road to Agility
+// Copyright (C) 2022  Road to Agility
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -6,7 +6,7 @@
 
 using Microsoft.EntityFrameworkCore;
 
-namespace TodoManagerApp.Persistence
+namespace Ecommerce.Persistence
 {
     public class SoftDeleteDbContext : DbContext
     {
