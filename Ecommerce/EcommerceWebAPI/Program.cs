@@ -1,21 +1,45 @@
-namespace EcommerceWebAPI
-{
-    public static class Program
-    {
-        public static async Task Main(string[] args)
-        {
-            await CreateHostBuilder(args).Build().RunAsync();
-        }
+using Ecommerce.Business.Extensions;
+using Ecommerce.Persistence;
+using Ecommerce.Persistence.ExtensionMethods;
+using EcommerceWebAPI.ApiEndpoints;
+using Microsoft.AspNetCore.Http.Json;
+using Microsoft.EntityFrameworkCore;
 
-        static IHostBuilder CreateHostBuilder(string[] args)
-        {
-            return Host.CreateDefaultBuilder(args)
-                .ConfigureLogging(logging =>
-                {
-                    logging.ClearProviders();
-                    logging.AddConsole();
-                })
-                .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
-        }
-    }
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
+builder.Services.AddDbContext<EcommerceAppDbContext>((options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("ModelConnection"))));
+
+builder.Services.AddRepositories();
+builder.Services.AddCommandHandlers();
+builder.Services.AddMediatorOperations();
+
+
+builder.Services.AddControllers();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Services.Configure<JsonOptions>(o =>
+{
+    o.SerializerOptions.IgnoreReadOnlyProperties = true;
+});
+
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
+
+EndpointRoutes.StateChangeApis(app);
+
+app.Run();
