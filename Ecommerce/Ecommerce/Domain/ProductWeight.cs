@@ -9,7 +9,7 @@ using DFlow.Domain.Validation;
 
 namespace Ecommerce.Domain;
 
-public class ProductWeight: ValueOf<float, ProductWeight>
+public class ProductWeight: ValueOf<double, ProductWeight>
 {
     public static ProductWeight Empty => From(-1.0f);
     

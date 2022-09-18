@@ -22,7 +22,7 @@ public static class ProductViewExtensions
             product.Weight.Value);
 }
 
-public record ProductView(Guid ProductId, string ProductName, string ProductDescription, float ProductWeight);
+public record ProductView(Guid ProductId, string ProductName, string ProductDescription, double ProductWeight);
 
 public record Result<TItem>( IReadOnlyList<TItem> Data, int Count); 
 

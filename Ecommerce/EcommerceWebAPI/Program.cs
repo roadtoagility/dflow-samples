@@ -13,7 +13,7 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
 builder.Services.AddDbContext<EcommerceAppDbContext>((options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("ModelConnection"))));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("ModelConnection"))));
 
 builder.Services.AddRepositories();
 builder.Services.AddCommandHandlers();

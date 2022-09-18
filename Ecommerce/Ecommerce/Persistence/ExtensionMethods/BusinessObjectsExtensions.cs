@@ -22,7 +22,7 @@ public static class BusinessObjectsExtensions
 
     public static Product ToProduct(this ProductState state)
         => Product.From(
-            ProductId.From(state.ProductStateId),
+            ProductId.From(state.Id),
             ProductName.From(state.Name),
             ProductDescription.From(state.Description),
             ProductWeight.From(state.Weight),

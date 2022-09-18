@@ -76,7 +76,7 @@ public class ProductRepository : IProductRepository
 
     public async Task<Product> GetById(ProductId id, CancellationToken cancellation)
     {
-        var result = await FindAsync(p => p.ProductStateId.Equals(id), cancellation);
+        var result = await FindAsync(p => p.Id.Equals(id), cancellation);
 
         if (result.Count == 0)
         {

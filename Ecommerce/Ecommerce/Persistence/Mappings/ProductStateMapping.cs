@@ -15,15 +15,17 @@ public class ProductStateMapping : IEntityTypeConfiguration<ProductState>
     public void Configure(EntityTypeBuilder<ProductState> builder)
     {
 
-        builder.Property(e=> e.ProductStateId).ValueGeneratedNever().IsRequired();
-        builder.HasKey(e=> e.ProductStateId);
+        builder.ToTable("products");
+        builder.Property(e=> e.Id)
+            .HasColumnName("id").ValueGeneratedNever().IsRequired();
+        builder.HasKey(e=> e.Id);
         
-        builder.Property(e=> e.Name);
-        builder.Property(e=> e.Description);
-        builder.Property(e=> e.Weight);
+        builder.Property(e=> e.Name).HasColumnName("name");
+        builder.Property(e=> e.Description).HasColumnName("description");
+        builder.Property(e=> e.Weight).HasColumnName("weight");
         
-        builder.Property(e => e.IsDeleted);
+        builder.Property(e => e.IsDeleted).HasColumnName("is_deleted");
         builder.HasQueryFilter(user => EF.Property<bool>(user, "IsDeleted") == false);
-        builder.Property(e => e.RowVersion);
+        builder.Property(e => e.RowVersion).HasColumnName("row_version");
     }
 }
