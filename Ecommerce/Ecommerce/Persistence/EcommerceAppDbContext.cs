@@ -15,8 +15,8 @@ public sealed class EcommerceAppDbContext: SoftDeleteDbContext
     public EcommerceAppDbContext(DbContextOptions<EcommerceAppDbContext> contextOptions)
         : base(contextOptions)
     {
-        this.Database.EnsureCreated();
         this.Database.EnsureDeleted();
+        this.Database.EnsureCreated();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

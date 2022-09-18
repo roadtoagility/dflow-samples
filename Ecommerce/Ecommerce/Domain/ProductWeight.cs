@@ -12,7 +12,6 @@ namespace Ecommerce.Domain;
 public class ProductWeight: ValueOf<float, ProductWeight>
 {
     public static ProductWeight Empty => From(-1.0f);
-    public static ProductWeight WeightMax => From(100.0f);
     
     protected override void Validate()
     {
@@ -20,11 +19,6 @@ public class ProductWeight: ValueOf<float, ProductWeight>
         {
             ValidationStatus.Append(Failure
                 .For("ProductWeight",$"O Peso {Value} informado não é valido."));
-        }
-        else if(Value < WeightMax.Value)
-        {
-            ValidationStatus.Append(Failure
-                .For("ProductWeight",$"O Peso {Value} informado está acima do limite máximo de {WeightMax}Kg."));
         }
     }
 }

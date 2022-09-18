@@ -6,6 +6,7 @@
 
 
 using DFlow.Business.Cqrs.CommandHandlers;
+using DFlow.Business.Cqrs.QueryHandlers;
 using FluentMediator;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,14 +18,19 @@ namespace Ecommerce.Business.Extensions
         {
             serviceCollection.AddFluentMediator(builder =>
             {
-                builder.On<CreateProduct>().PipelineAsync()
-                    .Return<CommandResult, CreateProductHandler>(
+                builder.On<ProductCreate>().PipelineAsync()
+                    .Return<CommandResult, ProductCreateHandler>(
                         async(handler, request) => await handler.Execute(request));
+                
+                builder.On<ProductList>().PipelineAsync()
+                    .Return<Result<ProductView>, ProductListHandler>(
+                        async(handler, request) => await handler.Execute(request));                
             });
         }
         public static void AddCommandHandlers(this IServiceCollection services)
         {
-            services.AddScoped<ICommandHandler<CreateProduct,CommandResult>, CreateProductHandler>();
+            services.AddScoped<ICommandHandler<ProductCreate,CommandResult>, ProductCreateHandler>();
+            services.AddScoped<IQueryHandler<ProductList,Result<ProductView>>, ProductListHandler>();
         }
     }
 }

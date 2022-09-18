@@ -12,30 +12,32 @@ using Ecommerce.Persistence.Repositories;
 
 namespace Ecommerce.Business;
 
-public sealed class CreateProductHandler:ICommandHandler<CreateProduct,CommandResult>
+public sealed class ProductCreateHandler:ICommandHandler<ProductCreate,CommandResult>
 {
     private readonly IDbSession<IProductRepository> _sessionDb;
-    public CreateProductHandler(IDbSession<IProductRepository> sessionDb)
+    public ProductCreateHandler(IDbSession<IProductRepository> sessionDb)
     {
         this._sessionDb = sessionDb;
     }
 
-    public Task<CommandResult> Execute(CreateProduct command)
+    public Task<CommandResult> Execute(ProductCreate command)
     {
         return Execute(command, CancellationToken.None);
     }
 
-    public async Task<CommandResult> Execute(CreateProduct command, CancellationToken cancellationToken)
+    public async Task<CommandResult> Execute(ProductCreate command, CancellationToken cancellationToken)
     {
-        var product = Product.NewProduct(command.Name, command.Description, command.Weight);
+        var product = Product.NewProduct(ProductName.From(command.Name),
+            ProductDescription.From(command.Description),
+            ProductWeight.From(command.Weight));
 
         if (product.IsValid)
         {
             await this._sessionDb.Repository.Add(product);
             await this._sessionDb.SaveChangesAsync(cancellationToken);
-            
             return product.ToResultSucced();
         }
-        return product.ToResultFailed();    
+
+        return product.ToResultFailed();
     }
 }

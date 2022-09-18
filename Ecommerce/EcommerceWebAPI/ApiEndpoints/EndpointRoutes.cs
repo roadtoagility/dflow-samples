@@ -5,6 +5,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using DFlow.Business.Cqrs.CommandHandlers;
+using DFlow.Business.Cqrs.QueryHandlers;
 using Ecommerce.Business;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,26 +15,23 @@ public static class EndpointRoutes
 {
     public static void StateChangeApis(WebApplication app)
     {
-        app.MapPost("/api/v1/products", async ([FromBody]CreateProduct command
-            ,ICommandHandler<CreateProduct, CommandResult> handler) =>
+        app.MapPost("/api/v1/products", async ([FromBody]ProductCreate command
+            ,ICommandHandler<ProductCreate, CommandResult> handler) =>
         {
-            if (command.IsValid == false)
-            {
-                return Results.BadRequest(command.Failures);
-            }
             var result = await handler.Execute(command);
 
             if (result.IsSucceed == false)
             {
-                return Results.BadRequest(command.Failures);
+                return Results.BadRequest(result.Violations);
             }
                     
             return Results.Ok(result);
         });
 
-        app.MapGet("/api/v1/products", (int pageNum, int pageSize) =>
+        app.MapGet("/api/v1/products", async (IQueryHandler<ProductList, Result<ProductView>> handler) =>
         {
-            return Results.Ok("");
+            var result = await handler.Execute(new ProductList("","", 1, 10));
+            return Results.Ok(result);
         });
     }
 }

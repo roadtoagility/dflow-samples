@@ -28,7 +28,7 @@ public class DbSession<TRepository> : IDbSession<TRepository>, IDisposable
             .ConfigureAwait(false);
     }
 
-    private void Dispose(bool disposing)
+    protected virtual void Dispose(bool disposing)
     {
         if (disposing)
         {

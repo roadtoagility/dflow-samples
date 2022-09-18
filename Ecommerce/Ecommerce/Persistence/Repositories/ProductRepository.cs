@@ -5,6 +5,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 
+using System.Collections.Immutable;
 using System.Linq.Expressions;
 using DFlow.Domain.BusinessObjects;
 using Ecommerce.Domain;
@@ -16,6 +17,9 @@ namespace Ecommerce.Persistence.Repositories;
 
 public class ProductRepository : IProductRepository
 {
+    private readonly int recordPageSizeLimit = 20;
+    private readonly int initialPageNumber = 1;
+    
     private readonly EcommerceAppDbContext _dbContext;
 
     public ProductRepository(EcommerceAppDbContext dbContext)
@@ -67,25 +71,37 @@ public class ProductRepository : IProductRepository
     public async Task<IReadOnlyList<Product>> FindAsync(Expression<Func<ProductState, bool>> predicate
         , CancellationToken cancellationToken)
     {
-        return await this._dbContext.Set<ProductState>()
-            .Where(predicate).AsNoTracking()
-            .Select(t => t.ToProduct())
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+        return await FindAsync(predicate, this.initialPageNumber, this.recordPageSizeLimit, cancellationToken);
     }
 
     public async Task<Product> GetById(ProductId id, CancellationToken cancellation)
     {
+        var result = await FindAsync(p => p.ProductStateId.Equals(id), cancellation);
+
+        if (result.Count == 0)
+        {
+            return Product.Empty();             
+        } 
+        return result.First();
+    }
+
+    public async Task<IReadOnlyList<Product>> FindAsync(Expression<Func<ProductState, bool>> predicate,
+        int pageNumber, 
+        int pageSize, CancellationToken cancellationToken)
+    {
         try
         {
-            return await FindAsync(p => p.ProductStateId.Equals(id), cancellation)
-                .ContinueWith(result =>
-                    result.Result.First(), cancellation);
+            return await this._dbContext.Set<ProductState>()
+                .Where(predicate).AsNoTracking()
+                .Skip(pageSize * (pageNumber - 1))
+                .Take(pageSize)
+                .Select(t => t.ToProduct())
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
         }
-        catch (InvalidOperationException ex)
+        catch (InvalidOperationException)
         {
-            return Product.Empty();
+            return ImmutableList<Product>.Empty;
         }
-
     }
 }
