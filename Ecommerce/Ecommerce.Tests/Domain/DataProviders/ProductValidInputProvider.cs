@@ -21,15 +21,13 @@ public class ProductValidInputProvider : IEnumerable<object[]>
         ProductWeight.From(1.0f),
         VersionId.From(1)
     );
+
     private readonly List<object[]> _data = new()
     {
-        new object[] {         
-            ProductId.From(Guid.NewGuid()),
-            ProductName.From("name"),
-            ProductDescription.From("descrição"),
-            ProductWeight.From(1.0f),
-            VersionId.From(1), 
-            product
+        new object[]
+        {
+            ProductId.From(Guid.NewGuid()), ProductName.From("name"), ProductDescription.From("descrição"),
+            ProductWeight.From(1.0f), VersionId.From(1), product
         }
     };
 

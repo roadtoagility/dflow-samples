@@ -9,7 +9,7 @@ using DFlow.Domain.Validation;
 
 namespace Ecommerce.Domain;
 
-public class ProductDescription: ValueOf<string, ProductDescription>
+public class ProductDescription : ValueOf<string, ProductDescription>
 {
     public static ProductDescription Empty => From(string.Empty);
 
@@ -19,7 +19,7 @@ public class ProductDescription: ValueOf<string, ProductDescription>
             string.IsNullOrWhiteSpace(Value))
         {
             ValidationStatus.Append(Failure
-                .For("ProductName","A descrição do produto é de preenchimento obrigatório."));
+                .For("ProductName", "A descrição do produto é de preenchimento obrigatório."));
         }
     }
 }

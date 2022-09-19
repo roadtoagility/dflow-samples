@@ -15,8 +15,8 @@ public static class EndpointRoutes
 {
     public static void StateChangeApis(WebApplication app)
     {
-        app.MapPost("/api/v1/products", async ([FromBody]ProductCreate command
-            ,ICommandHandler<ProductCreate, CommandResult> handler) =>
+        app.MapPost("/api/v1/products", async ([FromBody] ProductCreate command
+            , ICommandHandler<ProductCreate, CommandResult> handler) =>
         {
             var result = await handler.Execute(command);
 
@@ -24,13 +24,13 @@ public static class EndpointRoutes
             {
                 return Results.BadRequest(result.Violations);
             }
-                    
+
             return Results.Ok(result);
         });
 
         app.MapGet("/api/v1/products", async (IQueryHandler<ProductList, Result<ProductView>> handler) =>
         {
-            var result = await handler.Execute(new ProductList("","", 1, 10));
+            var result = await handler.Execute(new ProductList("", "", 1, 10));
             return Results.Ok(result);
         });
     }

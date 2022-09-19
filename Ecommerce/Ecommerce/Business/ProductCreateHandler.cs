@@ -12,9 +12,10 @@ using Ecommerce.Persistence.Repositories;
 
 namespace Ecommerce.Business;
 
-public sealed class ProductCreateHandler:ICommandHandler<ProductCreate,CommandResult>
+public sealed class ProductCreateHandler : ICommandHandler<ProductCreate, CommandResult>
 {
     private readonly IDbSession<IProductRepository> _sessionDb;
+
     public ProductCreateHandler(IDbSession<IProductRepository> sessionDb)
     {
         this._sessionDb = sessionDb;

@@ -12,4 +12,4 @@ namespace Ecommerce.Business;
 public record Paged(int pageNum, int pageSize);
 
 public record ProductList(string Description, string Name, int pageNum, int pageSize)
-    :Paged(pageNum, pageSize);
+    : Paged(pageNum, pageSize);

@@ -15,11 +15,10 @@ namespace Ecommerce.Business.Extensions
         {
             return new CommandResult(product.IsValid, product.Identity.Value);
         }
-        
+
         public static CommandResult ToResultFailed(this Product product)
         {
             return new CommandResult(product.IsValid, Guid.Empty, product.Failures);
         }
-
     }
 }

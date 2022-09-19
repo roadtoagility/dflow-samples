@@ -12,10 +12,7 @@ namespace Ecommerce.Tests.Domain.DataProviders;
 
 public class ProductWeightValidInputProvider : IEnumerable<object[]>
 {
-    private readonly List<object[]> _data = new()
-    {
-        new object[] { 1.0f, ProductWeight.From(1.0f)}
-    };
+    private readonly List<object[]> _data = new() { new object[] { 1.0f, ProductWeight.From(1.0f) } };
 
     public IEnumerator<object[]> GetEnumerator() => this._data.GetEnumerator();
 

@@ -19,7 +19,7 @@ public class ProductRepository : IProductRepository
 {
     private readonly int recordPageSizeLimit = 20;
     private readonly int initialPageNumber = 1;
-    
+
     private readonly EcommerceAppDbContext _dbContext;
 
     public ProductRepository(EcommerceAppDbContext dbContext)
@@ -63,8 +63,8 @@ public class ProductRepository : IProductRepository
             throw new ArgumentException(
                 $"O produto {entity.Name} com identificação {entity.Identity} não foi encontrado.");
         }
-        
-        var entry = entity.ToProductState();        
+
+        var entry = entity.ToProductState();
         this._dbContext.Set<ProductState>().Remove(entry);
     }
 
@@ -80,13 +80,14 @@ public class ProductRepository : IProductRepository
 
         if (result.Count == 0)
         {
-            return Product.Empty();             
-        } 
+            return Product.Empty();
+        }
+
         return result.First();
     }
 
     public async Task<IReadOnlyList<Product>> FindAsync(Expression<Func<ProductState, bool>> predicate,
-        int pageNumber, 
+        int pageNumber,
         int pageSize, CancellationToken cancellationToken)
     {
         try

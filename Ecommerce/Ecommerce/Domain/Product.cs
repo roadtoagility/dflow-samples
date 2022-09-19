@@ -8,20 +8,21 @@ using DFlow.Domain.BusinessObjects;
 
 namespace Ecommerce.Domain;
 
-public class Product: BaseEntity<ProductId>
+public class Product : BaseEntity<ProductId>
 {
     public ProductName Name { get; }
-    
+
     public ProductWeight Weight { get; }
     public ProductDescription Description { get; }
-    
-    public Product(ProductId identity, ProductName name, ProductDescription description, ProductWeight weight, VersionId version) 
+
+    public Product(ProductId identity, ProductName name, ProductDescription description, ProductWeight weight,
+        VersionId version)
         : base(identity, version)
     {
         Description = description;
         Name = name;
         Weight = weight;
-        
+
         AppendValidationResult(identity.ValidationStatus.Failures);
         AppendValidationResult(description.ValidationStatus.Failures);
         AppendValidationResult(name.ValidationStatus.Failures);
@@ -35,22 +36,22 @@ public class Product: BaseEntity<ProductId>
         yield return Description;
         yield return Weight;
     }
-   
-    public static Product From(ProductId id, ProductName name,ProductDescription description
+
+    public static Product From(ProductId id, ProductName name, ProductDescription description
         , ProductWeight weight, VersionId version)
     {
-        return new Product(id,name, description,weight,version);
+        return new Product(id, name, description, weight, version);
     }
-    
+
     public static Product NewProduct(ProductName name, ProductDescription description
         , ProductWeight weight)
     {
-        return From( ProductId.NewId(), name, description, weight, VersionId.New());
+        return From(ProductId.NewId(), name, description, weight, VersionId.New());
     }
 
     public static Product Empty()
     {
         return From(ProductId.Empty, ProductName.Empty, ProductDescription.Empty
-            , ProductWeight.Empty,VersionId.Empty());
+            , ProductWeight.Empty, VersionId.Empty());
     }
 }

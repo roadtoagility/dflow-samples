@@ -14,10 +14,7 @@ namespace Ecommerce.Tests.Domain.DataProviders;
 
 public class ProductDescriptionInvalidInputProvider : IEnumerable<object[]>
 {
-    private readonly List<object[]> _data = new()
-    {
-        new object[] { "", false}
-    };
+    private readonly List<object[]> _data = new() { new object[] { "", false } };
 
     public IEnumerator<object[]> GetEnumerator() => this._data.GetEnumerator();
 

@@ -15,7 +15,7 @@ namespace Ecommerce.Business;
 public static class ProductViewExtensions
 {
     public static ProductView ToProductView(this Product product)
-        => new (
+        => new(
             product.Identity.Value,
             product.Name.Value,
             product.Description.Value,
@@ -24,12 +24,12 @@ public static class ProductViewExtensions
 
 public record ProductView(Guid ProductId, string ProductName, string ProductDescription, double ProductWeight);
 
-public record Result<TItem>( IReadOnlyList<TItem> Data, int Count); 
+public record Result<TItem>(IReadOnlyList<TItem> Data, int Count);
 
-
-public sealed class ProductListHandler:IQueryHandler<ProductList,Result<ProductView>>
+public sealed class ProductListHandler : IQueryHandler<ProductList, Result<ProductView>>
 {
     private readonly IDbSession<IProductRepository> _sessionDb;
+
     public ProductListHandler(IDbSession<IProductRepository> sessionDb)
     {
         this._sessionDb = sessionDb;
@@ -42,13 +42,13 @@ public sealed class ProductListHandler:IQueryHandler<ProductList,Result<ProductV
 
     public async Task<Result<ProductView>> Execute(ProductList filter, CancellationToken cancellationToken)
     {
-            var products = await this._sessionDb.Repository
-                .FindAsync(f=> f.Name.Contains(filter.Name) 
-                               || f.Description.Contains(filter.Description) 
-                    , cancellationToken);
-            var productsView = products.Select(p => p.ToProductView())
-                .ToImmutableList();
-            
-            return new Result<ProductView>(productsView, productsView.Count);
+        var products = await this._sessionDb.Repository
+            .FindAsync(f => f.Name.Contains(filter.Name)
+                            || f.Description.Contains(filter.Description)
+                , cancellationToken);
+        var productsView = products.Select(p => p.ToProductView())
+            .ToImmutableList();
+
+        return new Result<ProductView>(productsView, productsView.Count);
     }
 }

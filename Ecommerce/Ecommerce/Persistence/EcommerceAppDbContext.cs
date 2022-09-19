@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ecommerce.Persistence;
 
-public sealed class EcommerceAppDbContext: SoftDeleteDbContext
+public sealed class EcommerceAppDbContext : SoftDeleteDbContext
 {
     public EcommerceAppDbContext(DbContextOptions<EcommerceAppDbContext> contextOptions)
         : base(contextOptions)

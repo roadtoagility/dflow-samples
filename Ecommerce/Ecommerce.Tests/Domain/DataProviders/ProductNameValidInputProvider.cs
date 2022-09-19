@@ -12,10 +12,7 @@ namespace Ecommerce.Tests.Domain.DataProviders;
 
 public class ProductNameValidInputProvider : IEnumerable<object[]>
 {
-    private readonly List<object[]> _data = new()
-    {
-        new object[] { "My Todos", ProductName.From("My Todos")}
-    };
+    private readonly List<object[]> _data = new() { new object[] { "My Todos", ProductName.From("My Todos") } };
 
     public IEnumerator<object[]> GetEnumerator() => this._data.GetEnumerator();
 

@@ -11,9 +11,10 @@ using Ecommerce.Persistence.State;
 
 namespace Ecommerce.Persistence.Repositories;
 
-public interface IProductRepository:IRepository<ProductState,Product>
+public interface IProductRepository : IRepository<ProductState, Product>
 {
-    Task<Product> GetById(ProductId id,CancellationToken cancellationToken);
-    
-    Task<IReadOnlyList<Product>> FindAsync(Expression<Func<ProductState, bool>> predicate, int pageNumber, int pageSize, CancellationToken cancellationToken);
+    Task<Product> GetById(ProductId id, CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<Product>> FindAsync(Expression<Func<ProductState, bool>> predicate, int pageNumber, int pageSize,
+        CancellationToken cancellationToken);
 }

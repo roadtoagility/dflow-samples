@@ -17,46 +17,46 @@ public class BusinessObjectTests
     public void CreateValidProductName(string input, ProductName expected)
     {
         var name = ProductName.From(input);
-        Assert.Equal(expected,name);
+        Assert.Equal(expected, name);
     }
-    
+
     [Theory]
     [ClassData(typeof(ProductNameInvalidInputProvider))]
     public void CreateInvalidProductName(string input, ProductName expected)
     {
         var name = ProductName.From(input);
-        Assert.Equal(expected,name);
+        Assert.Equal(expected, name);
     }
-    
+
     [Theory]
     [ClassData(typeof(ProductWeightValidInputProvider))]
     public void CreateValidWeight(float input, ProductWeight expected)
     {
         var name = ProductWeight.From(input);
-        Assert.Equal(expected,name);
+        Assert.Equal(expected, name);
     }
-    
+
     [Theory]
     [ClassData(typeof(ProductWeightInvalidInputProvider))]
     public void CreateInvalidWeight(float input, ProductWeight expected)
     {
         var name = ProductWeight.From(input);
-        Assert.Equal(expected,name);
+        Assert.Equal(expected, name);
     }
-    
+
     [Theory]
     [ClassData(typeof(ProductDescriptionValidInputProvider))]
     public void CreateValidDescription(float input, ProductWeight expected)
     {
         var name = ProductWeight.From(input);
-        Assert.Equal(expected,name);
+        Assert.Equal(expected, name);
     }
-    
+
     [Theory]
     [ClassData(typeof(ProductDescriptionInvalidInputProvider))]
     public void CreateInvalidDescription(string input, ProductDescription expected)
     {
         var name = ProductDescription.From(input);
-        Assert.Equal(expected,name);
+        Assert.Equal(expected, name);
     }
 }

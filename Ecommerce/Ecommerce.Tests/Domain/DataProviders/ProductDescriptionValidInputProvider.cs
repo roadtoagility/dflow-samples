@@ -13,7 +13,7 @@ public class ProductDescriptionValidInputProvider : IEnumerable<object[]>
 {
     private readonly List<object[]> _data = new()
     {
-        new object[] { "Descrição do produto cotando a história dele.", true}
+        new object[] { "Descrição do produto cotando a história dele.", true }
     };
 
     public IEnumerator<object[]> GetEnumerator() => this._data.GetEnumerator();

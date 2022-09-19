@@ -13,21 +13,21 @@ namespace Ecommerce.Business;
 public sealed class CommandResult : ExecutionResult
 {
     public CommandResult(bool isSucceed, IReadOnlyList<Failure> violations)
-    :base(isSucceed, violations)
+        : base(isSucceed, violations)
     {
-
     }
-    public CommandResult(bool isSucceed, Guid id) 
+
+    public CommandResult(bool isSucceed, Guid id)
         : this(isSucceed, ImmutableArray<Failure>.Empty)
     {
         Id = id;
-        
     }
-    public CommandResult(bool isSucceed, Guid id, IReadOnlyList<Failure> violations) 
+
+    public CommandResult(bool isSucceed, Guid id, IReadOnlyList<Failure> violations)
         : base(isSucceed, violations)
     {
         Id = id;
     }
-    
+
     public Guid Id { get; }
 }

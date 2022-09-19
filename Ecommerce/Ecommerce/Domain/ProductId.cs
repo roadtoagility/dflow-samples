@@ -10,9 +10,10 @@ using DFlow.Domain.Validation;
 
 namespace Ecommerce.Domain;
 
-public class ProductId: ValueOf<Guid, ProductId>
+public class ProductId : ValueOf<Guid, ProductId>
 {
     public static ProductId Empty => ProductId.From(Guid.Empty);
+
     public static ProductId From(string productId)
     {
         Guid id = Guid.Empty;
@@ -20,9 +21,10 @@ public class ProductId: ValueOf<Guid, ProductId>
         {
             var result = From(Empty.Value);
             result.ValidationStatus.Append(Failure
-                .For("ProductId",$"O id do produto '{productId}' informado não é válido."));
+                .For("ProductId", $"O id do produto '{productId}' informado não é válido."));
             return result;
         }
+
         return From(id);
     }
 
@@ -30,12 +32,11 @@ public class ProductId: ValueOf<Guid, ProductId>
     {
         return From(Guid.NewGuid());
     }
-    
+
     protected override void Validate()
     {
         if (Value.Equals(Guid.Empty))
         {
-            
         }
     }
 }

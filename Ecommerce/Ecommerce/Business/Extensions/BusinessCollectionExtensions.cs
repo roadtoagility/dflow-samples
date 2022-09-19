@@ -20,17 +20,18 @@ namespace Ecommerce.Business.Extensions
             {
                 builder.On<ProductCreate>().PipelineAsync()
                     .Return<CommandResult, ProductCreateHandler>(
-                        async(handler, request) => await handler.Execute(request));
-                
+                        async (handler, request) => await handler.Execute(request));
+
                 builder.On<ProductList>().PipelineAsync()
                     .Return<Result<ProductView>, ProductListHandler>(
-                        async(handler, request) => await handler.Execute(request));                
+                        async (handler, request) => await handler.Execute(request));
             });
         }
+
         public static void AddCommandHandlers(this IServiceCollection services)
         {
-            services.AddScoped<ICommandHandler<ProductCreate,CommandResult>, ProductCreateHandler>();
-            services.AddScoped<IQueryHandler<ProductList,Result<ProductView>>, ProductListHandler>();
+            services.AddScoped<ICommandHandler<ProductCreate, CommandResult>, ProductCreateHandler>();
+            services.AddScoped<IQueryHandler<ProductList, Result<ProductView>>, ProductListHandler>();
         }
     }
 }
