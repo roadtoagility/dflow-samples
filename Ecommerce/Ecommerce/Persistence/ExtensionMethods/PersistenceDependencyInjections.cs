@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Ecommerce.Persistence.ExtensionMethods
 {
-    public static class PersistenceCollectionExtensions
+    public static class PersistenceDependencyInjections
     {
         public static void AddRepositories(this IServiceCollection services)
         {

@@ -9,6 +9,7 @@ using System.Collections.Immutable;
 using System.Linq.Expressions;
 using DFlow.Domain.BusinessObjects;
 using Ecommerce.Domain;
+using Ecommerce.Domain.Aggregates;
 using Ecommerce.Persistence.ExtensionMethods;
 using Ecommerce.Persistence.State;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +26,15 @@ public class ProductRepository : IProductRepository
     public ProductRepository(EcommerceAppDbContext dbContext)
     {
         this._dbContext = dbContext;
+    }
+
+    public async Task Add(ProductAggregationRoot aggregate)
+    {
+        await Add(aggregate.GetChange());
+        var outbox = aggregate.ToOutBox();
+        await this._dbContext
+            .Set<AggregateState>()
+            .AddRangeAsync(outbox);
     }
 
     public async Task Add(Product entity)

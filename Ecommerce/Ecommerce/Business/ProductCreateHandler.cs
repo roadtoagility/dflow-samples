@@ -8,6 +8,7 @@ using DFlow.Business.Cqrs.CommandHandlers;
 using DFlow.Persistence;
 using Ecommerce.Business.Extensions;
 using Ecommerce.Domain;
+using Ecommerce.Domain.Aggregates;
 using Ecommerce.Persistence.Repositories;
 
 namespace Ecommerce.Business;
@@ -28,17 +29,18 @@ public sealed class ProductCreateHandler : ICommandHandler<ProductCreate, Comman
 
     public async Task<CommandResult> Execute(ProductCreate command, CancellationToken cancellationToken)
     {
-        var product = Product.NewProduct(ProductName.From(command.Name),
+        var aggregate = ProductAggregationRoot.Create(ProductName.From(command.Name),
             ProductDescription.From(command.Description),
             ProductWeight.From(command.Weight));
 
-        if (product.IsValid)
+        if (aggregate.IsValid)
         {
-            await this._sessionDb.Repository.Add(product);
+            // await this._sessionDb.Repository.Add(aggregate.GetChange());
+            await this._sessionDb.Repository.Add(aggregate);
             await this._sessionDb.SaveChangesAsync(cancellationToken);
-            return product.ToResultSucced();
+            return aggregate.GetChange().ToResultSucced();
         }
 
-        return product.ToResultFailed();
+        return aggregate.GetChange().ToResultFailed();
     }
 }

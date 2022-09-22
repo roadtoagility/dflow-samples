@@ -20,5 +20,6 @@ public sealed class EcommerceAppDbContext : SoftDeleteDbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         new ProductStateMapping().Configure(modelBuilder.Entity<ProductState>());
+        new AggregateStateMapping().Configure(modelBuilder.Entity<AggregateState>());
     }
 }

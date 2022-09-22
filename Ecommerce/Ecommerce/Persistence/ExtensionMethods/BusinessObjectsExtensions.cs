@@ -27,4 +27,5 @@ public static class BusinessObjectsExtensions
             ProductDescription.From(state.Description),
             ProductWeight.From(state.Weight),
             VersionId.From(BitConverter.ToInt32(state.RowVersion)));
+    
 }
