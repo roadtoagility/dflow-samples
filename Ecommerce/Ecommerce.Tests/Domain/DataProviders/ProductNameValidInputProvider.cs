@@ -14,7 +14,10 @@ public class ProductNameValidInputProvider : IEnumerable<object[]>
 {
     private readonly List<object[]> _data = new() { new object[] { "My Todos", ProductName.From("My Todos") } };
 
-    public IEnumerator<object[]> GetEnumerator() => this._data.GetEnumerator();
+    public IEnumerator<object[]> GetEnumerator()
+    {
+        return this._data.GetEnumerator();
+    }
 
     IEnumerator IEnumerable.GetEnumerator()
     {

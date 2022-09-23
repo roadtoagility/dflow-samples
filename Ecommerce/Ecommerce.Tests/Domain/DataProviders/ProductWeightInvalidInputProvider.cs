@@ -14,7 +14,10 @@ public class ProductWeightInvalidInputProvider : IEnumerable<object[]>
 {
     private readonly List<object[]> _data = new() { new object[] { -1.0f, ProductWeight.From(-1.0f) } };
 
-    public IEnumerator<object[]> GetEnumerator() => this._data.GetEnumerator();
+    public IEnumerator<object[]> GetEnumerator()
+    {
+        return this._data.GetEnumerator();
+    }
 
     IEnumerator IEnumerable.GetEnumerator()
     {

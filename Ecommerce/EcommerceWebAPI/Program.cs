@@ -12,8 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
-builder.Services.AddDbContext<EcommerceAppDbContext>((options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("ModelConnection"))));
+builder.Services.AddDbContext<EcommerceAppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("ModelConnection")));
 
 builder.Services.AddRepositories();
 builder.Services.AddCommandHandlers();

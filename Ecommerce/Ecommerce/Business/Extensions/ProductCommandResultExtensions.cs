@@ -7,18 +7,17 @@
 
 using Ecommerce.Domain;
 
-namespace Ecommerce.Business.Extensions
-{
-    public static class ProductCommandResultExtensions
-    {
-        public static CommandResult ToResultSucced(this Product product)
-        {
-            return new CommandResult(product.IsValid, product.Identity.Value);
-        }
+namespace Ecommerce.Business.Extensions;
 
-        public static CommandResult ToResultFailed(this Product product)
-        {
-            return new CommandResult(product.IsValid, Guid.Empty, product.Failures);
-        }
+public static class ProductCommandResultExtensions
+{
+    public static CommandResult ToResultSucced(this Product product)
+    {
+        return new CommandResult(product.IsValid, product.Identity.Value);
+    }
+
+    public static CommandResult ToResultFailed(this Product product)
+    {
+        return new CommandResult(product.IsValid, Guid.Empty, product.Failures);
     }
 }

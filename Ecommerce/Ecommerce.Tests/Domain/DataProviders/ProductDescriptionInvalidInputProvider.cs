@@ -6,9 +6,6 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using DFlow.Domain.BusinessObjects;
-using Ecommerce.Domain;
 
 namespace Ecommerce.Tests.Domain.DataProviders;
 
@@ -16,7 +13,10 @@ public class ProductDescriptionInvalidInputProvider : IEnumerable<object[]>
 {
     private readonly List<object[]> _data = new() { new object[] { "", false } };
 
-    public IEnumerator<object[]> GetEnumerator() => this._data.GetEnumerator();
+    public IEnumerator<object[]> GetEnumerator()
+    {
+        return this._data.GetEnumerator();
+    }
 
     IEnumerator IEnumerable.GetEnumerator()
     {

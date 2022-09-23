@@ -14,7 +14,7 @@ namespace Ecommerce.Tests.Domain.DataProviders;
 
 public class ProductValidInputProvider : IEnumerable<object[]>
 {
-    static Product product = Product.From(
+    private static readonly Product product = Product.From(
         ProductId.From(Guid.NewGuid()),
         ProductName.From("name"),
         ProductDescription.From("descrição"),
@@ -31,7 +31,10 @@ public class ProductValidInputProvider : IEnumerable<object[]>
         }
     };
 
-    public IEnumerator<object[]> GetEnumerator() => this._data.GetEnumerator();
+    public IEnumerator<object[]> GetEnumerator()
+    {
+        return this._data.GetEnumerator();
+    }
 
     IEnumerator IEnumerable.GetEnumerator()
     {

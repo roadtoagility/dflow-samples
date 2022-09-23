@@ -6,16 +6,14 @@
 
 using System.Collections.Immutable;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using Ecommerce.Domain.Aggregates;
-using Ecommerce.Domain.Events;
 using Ecommerce.Persistence.State;
 
 namespace Ecommerce.Persistence.ExtensionMethods;
 
 public static class EventsOutboxExporting
 {
-    public static IReadOnlyList<AggregateState> ToOutBox(this ProductAggregationRoot  aggregate)
+    public static IReadOnlyList<AggregateState> ToOutBox(this ProductAggregationRoot aggregate)
     {
         return aggregate.GetEvents().Select(e => new AggregateState(
             Guid.NewGuid(),

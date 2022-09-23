@@ -6,34 +6,33 @@
 
 using Microsoft.EntityFrameworkCore;
 
-namespace Ecommerce.Persistence
+namespace Ecommerce.Persistence;
+
+public class SoftDeleteDbContext : DbContext
 {
-    public class SoftDeleteDbContext : DbContext
+    public SoftDeleteDbContext(DbContextOptions options)
+        : base(options)
     {
-        public SoftDeleteDbContext(DbContextOptions options)
-            : base(options)
-        {
-        }
+    }
 
-        public override int SaveChanges()
-        {
-            UpdateSoftDeleteLogic();
-            return base.SaveChanges();
-        }
+    public override int SaveChanges()
+    {
+        UpdateSoftDeleteLogic();
+        return base.SaveChanges();
+    }
 
-        private void UpdateSoftDeleteLogic()
+    private void UpdateSoftDeleteLogic()
+    {
+        foreach (var entry in ChangeTracker.Entries())
         {
-            foreach (var entry in ChangeTracker.Entries())
+            if (entry.State == EntityState.Deleted)
             {
-                if (entry.State == EntityState.Deleted)
-                {
-                    entry.State = EntityState.Modified;
-                    entry.CurrentValues["IsDeleted"] = true;
-                }
-                else
-                {
-                    entry.CurrentValues["IsDeleted"] = false;
-                }
+                entry.State = EntityState.Modified;
+                entry.CurrentValues["IsDeleted"] = true;
+            }
+            else
+            {
+                entry.CurrentValues["IsDeleted"] = false;
             }
         }
     }

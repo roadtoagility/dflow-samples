@@ -8,14 +8,13 @@ using DFlow.Persistence;
 using Ecommerce.Persistence.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Ecommerce.Persistence.ExtensionMethods
+namespace Ecommerce.Persistence.ExtensionMethods;
+
+public static class PersistenceDependencyInjections
 {
-    public static class PersistenceDependencyInjections
+    public static void AddRepositories(this IServiceCollection services)
     {
-        public static void AddRepositories(this IServiceCollection services)
-        {
-            services.AddScoped<IProductRepository, ProductRepository>();
-            services.AddScoped<IDbSession<IProductRepository>, DbSession<IProductRepository>>();
-        }
+        services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<IDbSession<IProductRepository>, DbSession<IProductRepository>>();
     }
 }

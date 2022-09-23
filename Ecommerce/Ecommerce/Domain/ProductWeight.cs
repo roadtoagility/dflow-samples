@@ -4,13 +4,20 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+using DFlow.Domain.BusinessObjects;
 using DFlow.Domain.Validation;
 
 namespace Ecommerce.Domain;
 
 public class ProductWeight : ValueOf<double, ProductWeight>
 {
-    public static ProductWeight Empty => From(-1.0f);
+    public static ProductWeight Empty
+    {
+        get
+        {
+            return From(-1.0f);
+        }
+    }
 
     protected override void Validate()
     {

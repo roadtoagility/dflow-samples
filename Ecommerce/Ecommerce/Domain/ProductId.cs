@@ -4,17 +4,24 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+using DFlow.Domain.BusinessObjects;
 using DFlow.Domain.Validation;
 
 namespace Ecommerce.Domain;
 
 public class ProductId : ValueOf<Guid, ProductId>
 {
-    public static ProductId Empty => ProductId.From(Guid.Empty);
+    public static ProductId Empty
+    {
+        get
+        {
+            return From(Guid.Empty);
+        }
+    }
 
     public static ProductId From(string productId)
     {
-        Guid id = Guid.Empty;
+        var id = Guid.Empty;
         if (Guid.TryParse(productId, out id) == false)
         {
             var result = From(Empty.Value);

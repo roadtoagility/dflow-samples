@@ -13,19 +13,22 @@ namespace Ecommerce.Persistence.ExtensionMethods;
 public static class BusinessObjectsExtensions
 {
     public static ProductState ToProductState(this Product product)
-        => new ProductState(
+    {
+        return new(
             product.Identity.Value,
             product.Name.Value,
             product.Description.Value,
             product.Weight.Value,
             BitConverter.GetBytes(product.Version.Value));
+    }
 
     public static Product ToProduct(this ProductState state)
-        => Product.From(
+    {
+        return Product.From(
             ProductId.From(state.Id),
             ProductName.From(state.Name),
             ProductDescription.From(state.Description),
             ProductWeight.From(state.Weight),
             VersionId.From(BitConverter.ToInt32(state.RowVersion)));
-    
+    }
 }

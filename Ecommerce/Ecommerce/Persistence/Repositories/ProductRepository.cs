@@ -18,10 +18,9 @@ namespace Ecommerce.Persistence.Repositories;
 
 public class ProductRepository : IProductRepository
 {
-    private readonly int recordPageSizeLimit = 20;
-    private readonly int initialPageNumber = 1;
-
     private readonly EcommerceAppDbContext _dbContext;
+    private readonly int initialPageNumber = 1;
+    private readonly int recordPageSizeLimit = 20;
 
     public ProductRepository(EcommerceAppDbContext dbContext)
     {

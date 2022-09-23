@@ -16,7 +16,10 @@ public class ProductDescriptionValidInputProvider : IEnumerable<object[]>
         new object[] { "Descrição do produto cotando a história dele.", true }
     };
 
-    public IEnumerator<object[]> GetEnumerator() => this._data.GetEnumerator();
+    public IEnumerator<object[]> GetEnumerator()
+    {
+        return this._data.GetEnumerator();
+    }
 
     IEnumerator IEnumerable.GetEnumerator()
     {

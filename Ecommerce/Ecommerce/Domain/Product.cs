@@ -10,11 +10,6 @@ namespace Ecommerce.Domain;
 
 public class Product : BaseEntity<ProductId>
 {
-    public ProductName Name { get; }
-
-    public ProductWeight Weight { get; }
-    public ProductDescription Description { get; }
-
     public Product(ProductId identity, ProductName name, ProductDescription description, ProductWeight weight,
         VersionId version)
         : base(identity, version)
@@ -28,6 +23,11 @@ public class Product : BaseEntity<ProductId>
         AppendValidationResult(name.ValidationStatus.Failures);
         AppendValidationResult(weight.ValidationStatus.Failures);
     }
+
+    public ProductName Name { get; }
+
+    public ProductWeight Weight { get; }
+    public ProductDescription Description { get; }
 
     protected override IEnumerable<object> GetEqualityComponents()
     {

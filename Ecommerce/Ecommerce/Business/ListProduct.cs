@@ -4,9 +4,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-using DFlow.Domain.Command;
-using Ecommerce.Domain;
-
 namespace Ecommerce.Business;
 
 public record Paged(int pageNum, int pageSize);

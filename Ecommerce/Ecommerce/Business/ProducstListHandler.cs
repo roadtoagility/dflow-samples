@@ -15,11 +15,13 @@ namespace Ecommerce.Business;
 public static class ProductViewExtensions
 {
     public static ProductView ToProductView(this Product product)
-        => new(
+    {
+        return new(
             product.Identity.Value,
             product.Name.Value,
             product.Description.Value,
             product.Weight.Value);
+    }
 }
 
 public record ProductView(Guid ProductId, string ProductName, string ProductDescription, double ProductWeight);

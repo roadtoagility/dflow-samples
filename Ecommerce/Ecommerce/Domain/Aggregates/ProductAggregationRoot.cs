@@ -1,10 +1,5 @@
-﻿
-using System.Collections.Immutable;
-using System.Text.Json.Nodes;
+﻿using System.Collections.Immutable;
 using DFlow.Domain.Aggregates;
-using DFlow.Domain.Events;
-using DFlow.Domain.Events.DomainEvents;
-using Ecommerce.Business;
 using Ecommerce.Domain.Events;
 
 namespace Ecommerce.Domain.Aggregates;
@@ -13,10 +8,6 @@ public sealed class ProductAggregationRoot : ObjectBasedAggregationRoot<Product,
 {
     private readonly IList<DomainEvent> _changes = new List<DomainEvent>();
 
-    private void Raise(DomainEvent @event) => this._changes.Add(@event);
-
-    public IReadOnlyList<DomainEvent> GetEvents() => this._changes.ToImmutableList();
-    
     public ProductAggregationRoot(Product product)
     {
         if (product.IsValid)
@@ -32,6 +23,16 @@ public sealed class ProductAggregationRoot : ObjectBasedAggregationRoot<Product,
         {
             AppendValidationResult(product.Failures);
         }
+    }
+
+    private void Raise(DomainEvent @event)
+    {
+        this._changes.Add(@event);
+    }
+
+    public IReadOnlyList<DomainEvent> GetEvents()
+    {
+        return this._changes.ToImmutableList();
     }
 
     public static ProductAggregationRoot Create(ProductName name, ProductDescription description, ProductWeight weight)

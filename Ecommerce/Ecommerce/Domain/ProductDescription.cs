@@ -4,13 +4,20 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+using DFlow.Domain.BusinessObjects;
 using DFlow.Domain.Validation;
 
 namespace Ecommerce.Domain;
 
 public class ProductDescription : ValueOf<string, ProductDescription>
 {
-    public static ProductDescription Empty => From(string.Empty);
+    public static ProductDescription Empty
+    {
+        get
+        {
+            return From(string.Empty);
+        }
+    }
 
     protected override void Validate()
     {

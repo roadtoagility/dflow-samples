@@ -10,28 +10,27 @@ using DFlow.Business.Cqrs.QueryHandlers;
 using FluentMediator;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Ecommerce.Business.Extensions
+namespace Ecommerce.Business.Extensions;
+
+public static class BusinessCollectionExtensions
 {
-    public static class BusinessCollectionExtensions
+    public static void AddMediatorOperations(this IServiceCollection serviceCollection)
     {
-        public static void AddMediatorOperations(this IServiceCollection serviceCollection)
+        serviceCollection.AddFluentMediator(builder =>
         {
-            serviceCollection.AddFluentMediator(builder =>
-            {
-                builder.On<ProductCreate>().PipelineAsync()
-                    .Return<CommandResult, ProductCreateHandler>(
-                        async (handler, request) => await handler.Execute(request));
+            builder.On<ProductCreate>().PipelineAsync()
+                .Return<CommandResult, ProductCreateHandler>(
+                    async (handler, request) => await handler.Execute(request));
 
-                builder.On<ProductList>().PipelineAsync()
-                    .Return<Result<ProductView>, ProductListHandler>(
-                        async (handler, request) => await handler.Execute(request));
-            });
-        }
+            builder.On<ProductList>().PipelineAsync()
+                .Return<Result<ProductView>, ProductListHandler>(
+                    async (handler, request) => await handler.Execute(request));
+        });
+    }
 
-        public static void AddCommandHandlers(this IServiceCollection services)
-        {
-            services.AddScoped<ICommandHandler<ProductCreate, CommandResult>, ProductCreateHandler>();
-            services.AddScoped<IQueryHandler<ProductList, Result<ProductView>>, ProductListHandler>();
-        }
+    public static void AddCommandHandlers(this IServiceCollection services)
+    {
+        services.AddScoped<ICommandHandler<ProductCreate, CommandResult>, ProductCreateHandler>();
+        services.AddScoped<IQueryHandler<ProductList, Result<ProductView>>, ProductListHandler>();
     }
 }
