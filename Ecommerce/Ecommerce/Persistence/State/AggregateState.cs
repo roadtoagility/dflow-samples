@@ -1,7 +1,17 @@
+using System.Text.Json;
+using NodaTime;
+
 namespace Ecommerce.Persistence.State;
 
 public sealed record AggregateState(Guid Id
     , Guid AggregateId
-    , string AggregationName
+    , string AggregationType
     , string EventType
-    , string EventData);
+    , Instant EventDatetime
+    , JsonDocument EventData):IDisposable
+{
+    public void Dispose()
+    {
+        EventData.Dispose();
+    }
+}

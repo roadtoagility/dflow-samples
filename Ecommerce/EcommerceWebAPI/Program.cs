@@ -4,20 +4,25 @@ using Ecommerce.Persistence.ExtensionMethods;
 using EcommerceWebAPI.ApiEndpoints;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Configuration
+    // .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
+    .AddJsonFile($"appsettings.{builder.Environment}.json", true, false);
 
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
 builder.Services.AddDbContext<EcommerceAppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("ModelConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("ModelConnection"),
+        o => o.UseNodaTime()));
 
 builder.Services.AddRepositories();
 builder.Services.AddCommandHandlers();
 builder.Services.AddMediatorOperations();
+builder.Services.AddWorkers();
 
 
 builder.Services.AddControllers();

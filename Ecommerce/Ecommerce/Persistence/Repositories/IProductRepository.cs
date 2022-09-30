@@ -15,6 +15,7 @@ namespace Ecommerce.Persistence.Repositories;
 public interface IProductRepository : IRepository<ProductState, Product>
 {
     Task Add(ProductAggregationRoot aggregate);
+    
     Task<Product> GetById(ProductId id, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<Product>> FindAsync(Expression<Func<ProductState, bool>> predicate, int pageNumber, int pageSize,

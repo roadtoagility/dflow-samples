@@ -14,14 +14,24 @@ public class AggregateStateMapping : IEntityTypeConfiguration<AggregateState>
 {
     public void Configure(EntityTypeBuilder<AggregateState> builder)
     {
-        builder.ToTable("aggregate_state");
+        builder.ToTable("products_outbox");
         builder.Property(e => e.Id)
-            .HasColumnName("id").ValueGeneratedNever().IsRequired();
+            .HasColumnName("id")
+            .ValueGeneratedNever()
+            .IsRequired();
         builder.HasKey(e => e.Id);
 
-        builder.Property(e => e.AggregateId).HasColumnName("aggregate_id");
-        builder.Property(e => e.AggregationName).HasColumnName("aggregation_name");
-        builder.Property(e => e.EventType).HasColumnName("event_type");
-        builder.Property(e => e.EventData).HasColumnName("event_data");
+        builder.Property(e => e.AggregateId)
+            .HasColumnName("aggregate_id");
+        builder.Property(e => e.AggregationType)
+            .HasColumnName("aggregation_type");
+        builder.Property(e => e.EventType)
+            .HasColumnName("event_type");
+        builder.Property(e => e.EventData)
+            .HasColumnName("event_data")
+            .HasColumnType("jsonb");
+        builder.Property(e => e.EventDatetime)
+            .HasColumnName("event_time")
+            .HasColumnType("timestamp with time zone");
     }
 }

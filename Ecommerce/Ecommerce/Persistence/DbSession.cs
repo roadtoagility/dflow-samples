@@ -16,6 +16,7 @@ public class DbSession<TRepository> : IDbSession<TRepository>, IDisposable
     {
         Context = context;
         Repository = repository;
+        
     }
 
     private DbContext Context { get; }

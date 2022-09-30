@@ -15,7 +15,7 @@ public class ProductTests
 {
     [Theory]
     [ClassData(typeof(ProductValidInputProvider))]
-    public void CreateValidProductName(
+    public void CreateValidProduct(
         ProductId productId,
         ProductName name,
         ProductDescription description,

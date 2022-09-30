@@ -1,11 +1,34 @@
 -- Create the schema that we'll use to populate data and watch the effect in the binlog
 CREATE SCHEMA ecommerce;
 SET
-search_path TO inventory;
+    search_path TO ecommerce;
 
 -- enable PostGis 
 CREATE
-EXTENSION postgis;
+    EXTENSION postgis;
+
+-- enable uuidv4
+create extension "uuid-ossp";
+
+CREATE TABLE IF NOT EXISTS ecommerce.products_outbox
+(
+    id uuid NOT NULL,
+    aggregate_id uuid NOT NULL,
+    aggregation_type character varying(255) NOT NULL,
+    event_type character varying(255) NOT NULL,
+    event_data jsonb COLLATE NOT NULL,
+    event_time timestamp with time zone NOT NULL,
+    CONSTRAINT products_outbox_pkey PRIMARY KEY (id)
+);
+-- this is not necessary because do we use the event source style and we are interest just in the insertion logs 
+--ALTER TABLE products_on_hand REPLICA IDENTITY FULL;
+
+CREATE PUBLICATION products_outbox_pub FOR TABLE products_outbox;
+--ALTER PUBLICATION products_outbox_pub ADD/DROP TABLE teble-name
+ALTER PUBLICATION products_outbox_pub SET (publish = 'insert');
+
+-- create persisten slot to store current position of data stream
+SELECT * FROM pg_create_logical_replication_slot('products_outbox_slot', 'pgoutput');
 
 -- Create and populate our products using a single insert with many rows
 CREATE TABLE products
@@ -14,7 +37,7 @@ CREATE TABLE products
     name        VARCHAR(255) NOT NULL,
     description VARCHAR(512),
     weight      FLOAT,
-        is_deleted BOOLEAN NOT NULL,
+    is_deleted BOOLEAN NOT NULL,
     row_version BYTEA
 );
 
@@ -91,14 +114,10 @@ CREATE TABLE orders
 ALTER TABLE orders REPLICA IDENTITY FULL;
 
 INSERT INTO orders
-VALUES ('a05e7cf4-2379-4c2f-87cf-d087088aa1de', '2016-01-16', '8bf35186-b69c-4789-8b45-a0e8dcaa1212', 1,
-        '5db3e6c6-ad06-455c-a537-fb80f66777d3'),
-       ('d3de8109-eaf1-4af5-85a2-98acd385659d', '2016-01-17', '2bd05da3-1a6b-499c-bfcf-c71f5a660ec0', 2,
-        '441e2178-ef95-4c81-b043-8d5156a9f035'),
-       ('8dc516b7-04d3-4ee5-8770-8e789b5582ac', '2016-02-19', '4e00e823-4ab3-4a32-ae69-8a47a9b4c9bd', 2,
-        '667c4dac-1502-4a2a-a341-227c801cb148'),
-       ('3d9b0048-3b53-475f-add7-c0286c28ccb2', '2016-02-21', '5d9c16fa-9f7a-444c-be61-804f474588e5', 1,
-        '72234aa3-a1d6-483f-821a-ec541e045372');
+VALUES ('a05e7cf4-2379-4c2f-87cf-d087088aa1de', '2016-01-16', '8bf35186-b69c-4789-8b45-a0e8dcaa1212', 1, '5db3e6c6-ad06-455c-a537-fb80f66777d3'),
+       ('d3de8109-eaf1-4af5-85a2-98acd385659d', '2016-01-17', '2bd05da3-1a6b-499c-bfcf-c71f5a660ec0', 2, '441e2178-ef95-4c81-b043-8d5156a9f035'),
+       ('8dc516b7-04d3-4ee5-8770-8e789b5582ac', '2016-02-19', '4e00e823-4ab3-4a32-ae69-8a47a9b4c9bd', 2, 'd4a8d6ad-6680-491a-ac64-d7b48da522b3'),
+       ('3d9b0048-3b53-475f-add7-c0286c28ccb2', '2016-02-21', '5d9c16fa-9f7a-444c-be61-804f474588e5', 1, '72234aa3-a1d6-483f-821a-ec541e045372');
 
 -- Create table with Spatial/Geometry type
 CREATE TABLE geom

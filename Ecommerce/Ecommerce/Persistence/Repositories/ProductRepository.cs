@@ -34,6 +34,9 @@ public class ProductRepository : IProductRepository
         await this._dbContext
             .Set<AggregateState>()
             .AddRangeAsync(outbox);
+        // this._dbContext
+        //     .Set<AggregateState>()
+        //     .RemoveRange(outbox);
     }
 
     public async Task Add(Product entity)
