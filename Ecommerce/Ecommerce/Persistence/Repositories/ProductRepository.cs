@@ -26,26 +26,13 @@ public class ProductRepository : IProductRepository
     {
         this._dbContext = dbContext;
     }
-
-    public async Task Add(ProductAggregationRoot aggregate)
+    public async Task Add(ProductAggregationRoot entity)
     {
-        await Add(aggregate.GetChange());
-        var outbox = aggregate.ToOutBox();
-        await this._dbContext
-            .Set<AggregateState>()
-            .AddRangeAsync(outbox);
-        // this._dbContext
-        //     .Set<AggregateState>()
-        //     .RemoveRange(outbox);
-    }
-
-    public async Task Add(Product entity)
-    {
-        var entry = entity.ToProductState();
+        var entry = entity.GetChange().ToProductState();
 
         var cancel = new CancellationTokenSource();
 
-        var oldState = await GetById(entity.Identity, cancel.Token)
+        var oldState = await GetById(entity.GetChange().Identity, cancel.Token)
             .ConfigureAwait(false);
 
         if (oldState.Equals(Product.Empty()))
@@ -54,30 +41,40 @@ public class ProductRepository : IProductRepository
         }
         else
         {
-            if (VersionId.Next(oldState.Version) > entity.Version)
+            if (VersionId.Next(oldState.Version) > entity.GetChange().Version)
             {
                 throw new DbUpdateConcurrencyException("This version is not the most updated for this object.");
             }
 
             this._dbContext.Entry(oldState).CurrentValues.SetValues(entry);
         }
+        
+        var outbox = entity.ToOutBox();
+        await this._dbContext
+            .Set<AggregateState>()
+            .AddRangeAsync(outbox,cancel.Token);
     }
 
-    public async Task Remove(Product entity)
+    public async Task Remove(ProductAggregationRoot entity)
     {
         var cancel = new CancellationTokenSource();
 
-        var oldState = await GetById(entity.Identity, cancel.Token)
+        var oldState = await GetById(entity.GetChange().Identity, cancel.Token)
             .ConfigureAwait(false);
 
         if (oldState.Equals(Product.Empty()))
         {
             throw new ArgumentException(
-                $"O produto {entity.Name} com identificação {entity.Identity} não foi encontrado.");
+                $"O produto {entity.GetChange().Name} com identificação {entity.GetChange().Identity} não foi encontrado.");
         }
 
-        var entry = entity.ToProductState();
+        var entry = entity.GetChange().ToProductState();
         this._dbContext.Set<ProductState>().Remove(entry);
+        
+        var outbox = entity.ToOutBox();
+        await this._dbContext
+            .Set<AggregateState>()
+            .AddRangeAsync(outbox,cancel.Token);
     }
 
     public async Task<IReadOnlyList<Product>> FindAsync(Expression<Func<ProductState, bool>> predicate
@@ -90,12 +87,7 @@ public class ProductRepository : IProductRepository
     {
         var result = await FindAsync(p => p.Id.Equals(id), cancellation);
 
-        if (result.Count == 0)
-        {
-            return Product.Empty();
-        }
-
-        return result.First();
+        return result.Count == 0 ? Product.Empty() : result.First();
     }
 
     public async Task<IReadOnlyList<Product>> FindAsync(Expression<Func<ProductState, bool>> predicate,

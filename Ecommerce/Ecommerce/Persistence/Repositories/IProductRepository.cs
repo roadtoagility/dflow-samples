@@ -5,17 +5,15 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using System.Linq.Expressions;
-using DFlow.Persistence.Repositories;
 using Ecommerce.Domain;
 using Ecommerce.Domain.Aggregates;
+using Ecommerce.Framework.Persistence.Repositories;
 using Ecommerce.Persistence.State;
 
 namespace Ecommerce.Persistence.Repositories;
 
-public interface IProductRepository : IRepository<ProductState, Product>
+public interface IProductRepository : IRepository<ProductAggregationRoot, ProductState, Product>
 {
-    Task Add(ProductAggregationRoot aggregate);
-    
     Task<Product> GetById(ProductId id, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<Product>> FindAsync(Expression<Func<ProductState, bool>> predicate, int pageNumber, int pageSize,
