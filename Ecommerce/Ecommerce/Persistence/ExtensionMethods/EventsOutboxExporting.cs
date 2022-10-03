@@ -6,6 +6,7 @@
 
 using System.Collections.Immutable;
 using System.Text.Json;
+using Ecommerce.Domain;
 using Ecommerce.Domain.Aggregates;
 using Ecommerce.Persistence.State;
 using NodaTime;
@@ -14,12 +15,12 @@ namespace Ecommerce.Persistence.ExtensionMethods;
 
 public static class EventsOutboxExporting
 {
-    public static IReadOnlyList<AggregateState> ToOutBox(this ProductAggregationRoot aggregate)
+    public static IReadOnlyList<AggregateState> ToOutBox(this Product entityAggregateRoot)
     {
-        return aggregate.GetEvents().Select(e => new AggregateState(
+        return entityAggregateRoot.GetEvents().Select(e => new AggregateState(
             Guid.NewGuid(),
-            aggregate.GetChange().Identity.Value,
-            nameof(ProductAggregationRoot),
+            entityAggregateRoot.Identity.Value,
+            entityAggregateRoot.GetType().Name,
             e.GetType().Name,
             Instant.FromDateTimeOffset(DateTimeOffset.Now), 
             JsonSerializer.SerializeToDocument(e, e.GetType())

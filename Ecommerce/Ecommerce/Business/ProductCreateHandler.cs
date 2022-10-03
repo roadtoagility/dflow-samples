@@ -35,8 +35,7 @@ public sealed class ProductCreateHandler : ICommandHandler<ProductCreate, Comman
 
         if (aggregate.IsValid)
         {
-            // await this._sessionDb.Repository.Add(aggregate.GetChange());
-            await this._sessionDb.Repository.Add(aggregate);
+            await this._sessionDb.Repository.Add(aggregate.GetChange());
             await this._sessionDb.SaveChangesAsync(cancellationToken);
             return aggregate.GetChange().ToResultSucced();
         }

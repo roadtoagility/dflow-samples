@@ -4,24 +4,28 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+using System.Text.Json.Nodes;
+using Avro;
+using Avro.Generic;
 using Confluent.Kafka;
 using Confluent.SchemaRegistry;
 using Confluent.SchemaRegistry.Serdes;
-using Ecommerce.Domain.Aggregates;
-using Ecommerce.Persistence.Repositories;
-using Ecommerce.Persistence.State;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using NodaTime;
 using Npgsql.Replication;
 using Npgsql.Replication.PgOutput;
 using Npgsql.Replication.PgOutput.Messages;
 
 namespace Ecommerce.Persistence.OutboxPublishing;
+
+// https://debezium.io/blog/2019/02/19/reliable-microservices-data-exchange-with-the-outbox-pattern/
+// https://pkritiotis.io/outbox-pattern-implementation-challenges/
+// https://medium.com/design-microservices-architecture-with-patterns/outbox-pattern-for-microservices-architectures-1b8648dfaa27
+// https://medium.com/engineering-varo/event-driven-architecture-and-the-outbox-pattern-569e6fba7216
+// https://thorben-janssen.com/outbox-pattern-hibernate/
+
 
 public class ProductOutboxWorker : BackgroundService
 {
@@ -78,6 +82,7 @@ public class ProductOutboxWorker : BackgroundService
                 if (message.GetType() == typeof(InsertMessage))
                 {
                     var insert = message as InsertMessage;
+                    var eventTimeProcessingMs = new DateTimeOffset(insert.ServerClock);
                     var data = insert.NewRow.GetAsyncEnumerator(cancellationToken);
                     await data.MoveNextAsync();
                     var headerEventId = await data.Current.Get<string>(cancellationToken);
@@ -91,16 +96,51 @@ public class ProductOutboxWorker : BackgroundService
                     var valuePayload = await data.Current.Get<string>(cancellationToken);
                     await data.MoveNextAsync();
                     var valueDatetimeOffset = await data.Current.Get<string>(cancellationToken);                    
+
+                    this._logger.LogInformation("Export Inserted Product Inserted {HeaderEventId} {TopicAggregationKey} {TopicNameAggregationType} {ValueEventType} {ValuePayload}"
+                        , headerEventId, topicAggregationKey, topicNameAggregationType, valueEventType, valuePayload);
                     
                     var topicName = $@"{systemIdentification.DbName}.{insert.Relation.Namespace}.{topicNameAggregationType}";
+                    
+                    // var productCreatedSchema = (RecordSchema)RecordSchema
+                    //     .Parse(File.ReadAllText("../../deploy/productaggregate-schema.json"));
 
-                    this._logger.LogInformation($"Export Inserted Product Inserted {headerEventId} {topicAggregationKey} {topicNameAggregationType} {valueEventType} {valuePayload}");
+                    var headerId = new Header("eventId", Guid.Parse(headerEventId).ToByteArray());
+                    //body = new GenericRecord(productCreatedSchema);
+                    var body = new JsonObject
+                    {
+                        { "eventType", valueEventType },
+                        { "eventProcessingTimeMs", eventTimeProcessingMs.ToUnixTimeMilliseconds() },
+                        { "payload", valuePayload }
+                    };
+
+                    using var schemaRegistry = new CachedSchemaRegistryClient(this._schemaRegistryConfig);
+                    using var producer =
+                        new ProducerBuilder<string, string>(this._producerConfig)
+                            // .SetValueSerializer(new AvroSerializer<GenericRecord>(schemaRegistry))
+                            // .SetValueSerializer(new JsonSerializer<JsonObject>(schemaRegistry))
+                            .Build();
+                    try
+                    {
+                        var outboxMessage = new Message<string, string> { Key = topicAggregationKey, Value = body.ToJsonString() ,Headers = new(){headerId}};
+                        var dr = await producer.ProduceAsync(topicName, outboxMessage,cancellationToken);
+                        // Console.WriteLine($"produced to: {dr.TopicPartitionOffset}");
+                        this._logger.LogInformation("New topic offset from published message: {TopicPartitionOffset}"
+                            , dr.TopicPartitionOffset);
+                        
+                        // Always call SetReplicationStatus() or assign LastAppliedLsn and LastFlushedLsn individually
+                        // so that Npgsql can inform the server which WAL files can be removed/recycled.
+                        this._dbConnection.SetReplicationStatus(message.WalEnd);
+                    }
+                    catch (ProduceException<string, JsonObject> ex)
+                    {
+                        // In some cases (notably Schema Registry connectivity issues), the InnerException
+                        // of the ProduceException contains additional information pertaining to the root
+                        // cause of the problem. This information is automatically included in the output
+                        // of the ToString() method of the ProduceException, called implicitly in the below.
+                        this._logger.LogError("Publishing failed: {ex}", ex);
+                    }
                 }
-                
-
-                // Always call SetReplicationStatus() or assign LastAppliedLsn and LastFlushedLsn individually
-                // so that Npgsql can inform the server which WAL files can be removed/recycled.
-                this._dbConnection.SetReplicationStatus(message.WalEnd);
             }
 
             await Task.Delay(100, cancellationToken);

@@ -5,10 +5,11 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using DFlow.Domain.BusinessObjects;
+using DFlow.Domain.Events;
 
 namespace Ecommerce.Domain;
 
-public class Product : BaseEntity<ProductId>
+public class Product : EntityBase<ProductId>
 {
     public Product(ProductId identity, ProductName name, ProductDescription description, ProductWeight weight,
         VersionId version)
