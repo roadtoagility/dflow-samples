@@ -17,7 +17,7 @@ public interface IDomainEvents
 
 public abstract class EntityBase<TEntityId> : BaseEntity<TEntityId>, IDomainEvents
 {
-    private IList<DomainEvent> _events => new List<DomainEvent>();
+    private IList<DomainEvent> _events = new List<DomainEvent>();
     
     protected EntityBase(TEntityId identity, VersionId version) : base(identity, version)
     {
@@ -25,12 +25,12 @@ public abstract class EntityBase<TEntityId> : BaseEntity<TEntityId>, IDomainEven
 
     public void RaisedEvent(DomainEvent @event)
     {
-        _events.Add(@event);
+        this._events.Add(@event);
     }
     
     public IReadOnlyList<DomainEvent> GetEvents()
     {
-        return _events.ToImmutableList();
+        return this._events.ToImmutableList();
     }
 
 
