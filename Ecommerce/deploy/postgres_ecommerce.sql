@@ -16,17 +16,18 @@ CREATE TABLE IF NOT EXISTS ecommerce.products_outbox
     aggregate_id uuid NOT NULL,
     aggregation_type character varying(255) NOT NULL,
     event_type character varying(255) NOT NULL,
-    event_data jsonb COLLATE NOT NULL,
+    event_data jsonb NOT NULL,
     event_time timestamp with time zone NOT NULL,
     CONSTRAINT products_outbox_pkey PRIMARY KEY (id)
 );
 -- this is not necessary because do we use the event source style and we are interest just in the insertion logs 
 --ALTER TABLE products_on_hand REPLICA IDENTITY FULL;
 
-CREATE PUBLICATION products_outbox_pub FOR TABLE products_outbox;
+CREATE PUBLICATION products_outbox_pub FOR TABLE products_outbox WITH (publish = 'insert');
 --ALTER PUBLICATION products_outbox_pub ADD/DROP TABLE teble-name
-ALTER PUBLICATION products_outbox_pub SET (publish = 'insert');
+--ALTER PUBLICATION products_outbox_pub SET (publish = 'insert');
 
+-- SELECT EXISTS( SELCT 1 from pg_replication_slots where slot_name = @slotName);
 -- create persisten slot to store current position of data stream
 SELECT * FROM pg_create_logical_replication_slot('products_outbox_slot', 'pgoutput');
 
@@ -40,8 +41,6 @@ CREATE TABLE products
     is_deleted BOOLEAN NOT NULL,
     row_version BYTEA
 );
-
-ALTER TABLE products REPLICA IDENTITY FULL;
 
 INSERT INTO products
 VALUES ('09ed82f6-4469-40ec-b601-943c7c848d6b', 'scooter', 'Small 2-wheel scooter', 3.14, false, '\x01000000'),
@@ -61,7 +60,6 @@ CREATE TABLE products_on_hand
     quantity   INTEGER NOT NULL,
     FOREIGN KEY (product_id) REFERENCES products (id)
 );
-ALTER TABLE products_on_hand REPLICA IDENTITY FULL;
 
 INSERT INTO products_on_hand
 VALUES ('09ed82f6-4469-40ec-b601-943c7c848d6b', 3);
@@ -91,8 +89,6 @@ CREATE TABLE customers
     email      VARCHAR(255) NOT NULL UNIQUE
 );
 
-ALTER TABLE customers REPLICA IDENTITY FULL;
-
 INSERT INTO customers
 VALUES ('8bf35186-b69c-4789-8b45-a0e8dcaa1212', 'Sally', 'Thomas', 'sally.thomas@acme.com'),
        ('2bd05da3-1a6b-499c-bfcf-c71f5a660ec0', 'George', 'Bailey', 'gbailey@foobar.com'),
@@ -111,8 +107,6 @@ CREATE TABLE orders
     FOREIGN KEY (product_id) REFERENCES products (id)
 );
 
-ALTER TABLE orders REPLICA IDENTITY FULL;
-
 INSERT INTO orders
 VALUES ('a05e7cf4-2379-4c2f-87cf-d087088aa1de', '2016-01-16', '8bf35186-b69c-4789-8b45-a0e8dcaa1212', 1, '5db3e6c6-ad06-455c-a537-fb80f66777d3'),
        ('d3de8109-eaf1-4af5-85a2-98acd385659d', '2016-01-17', '2bd05da3-1a6b-499c-bfcf-c71f5a660ec0', 2, '441e2178-ef95-4c81-b043-8d5156a9f035'),
@@ -126,8 +120,6 @@ CREATE TABLE geom
     g  GEOMETRY NOT NULL,
     h  GEOMETRY
 );
-
-
 
 INSERT INTO geom
 VALUES ('511a0563-fa63-4698-a9c2-fa3dfac23ba1', ST_GeomFromText('POINT(1 1)')),

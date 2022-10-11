@@ -24,8 +24,25 @@ public class ProductName : ValueOf<string, ProductName>
         if (string.IsNullOrEmpty(Value) ||
             string.IsNullOrWhiteSpace(Value))
         {
-            ValidationStatus.Append(Failure
-                .For("ProductName", "O nome do produto é de preenchimento obrigatório."));
+            ValidationStatus.Append(ProductNameInvalidFailure.Create());
+        }
+    }
+
+    public class ProductNameInvalidFailure : Failure
+    {
+        public ProductNameInvalidFailure(string propertyName, string message) 
+            : this(propertyName, message, String.Empty)
+        {
+        }
+        public ProductNameInvalidFailure(string propertyName, string message, string value) 
+            : base(propertyName, message, value)
+        {
+        }
+
+        public static Failure Create()
+        {
+            return new ProductNameInvalidFailure("ProductName", 
+                "O nome do produto é de preenchimento obrigatório.");
         }
     }
 }
