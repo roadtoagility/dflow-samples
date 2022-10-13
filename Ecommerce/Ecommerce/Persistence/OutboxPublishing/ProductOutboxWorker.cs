@@ -4,22 +4,20 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-using System.Data;
+using System.Text.Json;
 using System.Text.Json.Nodes;
-using Avro;
-using Avro.Generic;
 using Confluent.Kafka;
 using Confluent.SchemaRegistry;
 using Confluent.SchemaRegistry.Serdes;
+using Ecommerce.Domain.Events.Exported;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Namotion.Reflection;
 using Npgsql;
 using Npgsql.Replication;
 using Npgsql.Replication.PgOutput;
 using Npgsql.Replication.PgOutput.Messages;
+using Timestamp = Google.Protobuf.WellKnownTypes.Timestamp;
 
 namespace Ecommerce.Persistence.OutboxPublishing;
 
@@ -29,25 +27,29 @@ namespace Ecommerce.Persistence.OutboxPublishing;
 // https://medium.com/engineering-varo/event-driven-architecture-and-the-outbox-pattern-569e6fba7216
 // https://thorben-janssen.com/outbox-pattern-hibernate/
 
+// how topic naming and schema registry works
+//https://docs.confluent.io/platform/current/schema-registry/serdes-develop/index.html#how-the-naming-strategies-work
+
+// schema registry tutorial 
+// https://docs.confluent.io/platform/current/schema-registry/schema_registry_onprem_tutorial.html#using-curl-to-interact-with-schema-registry
+
+// https://debezium.io/blog/2020/02/10/event-sourcing-vs-cdc/
 
 public class ProductOutboxWorker : BackgroundService
 {
     private readonly ILogger _logger;
-    private readonly IServiceScopeFactory _scopeFactory;
     private readonly string _schemaRegistryEndpoints;
     private readonly string _brokerEndpoints;
     private SchemaRegistryConfig _schemaRegistryConfig;
     private ProducerConfig _producerConfig;
     private readonly string _connectionString;
     private LogicalReplicationConnection _dbConnection;
-    private readonly PgOutputReplicationSlot _products_outbox_slot = new ("products_outbox_slot");
 
-    public ProductOutboxWorker(ILogger<ProductOutboxWorker> logger, IServiceScopeFactory scopeFactory, IConfiguration configuration)
+    public ProductOutboxWorker(ILogger<ProductOutboxWorker> logger, IConfiguration configuration)
     {
         this._schemaRegistryEndpoints = configuration.GetSection("MessagingEndpoints:SchemaRegistry").Value;
         this._brokerEndpoints = configuration.GetSection("MessagingEndpoints:Brokers").Value;
         this._connectionString = configuration.GetConnectionString("ModelConnection");
-        _scopeFactory = scopeFactory;
         this._logger = logger;
     }
 
@@ -64,13 +66,8 @@ public class ProductOutboxWorker : BackgroundService
 
         if (hasPublication == false)
         {
-            string insertPub = "CREATE PUBLICATION @pubName FOR TABLE @outboxTable WITH (publish = 'insert')"; 
+            string insertPub = "CREATE PUBLICATION products_outbox_pub FOR TABLE products_outbox WITH (publish = 'insert')"; 
             await using var insertPublication = new NpgsqlCommand(insertPub, conn);
-            insertPublication.Parameters.AddRange(
-            new []{
-                new NpgsqlParameter<string>("pubName","products_outbox_pub"),
-                new NpgsqlParameter<string>("outboxTable","products_outbox")
-            });
             await insertPublication.PrepareAsync(cancellationToken);
             await insertPublication.ExecuteNonQueryAsync(cancellationToken);
         }
@@ -103,7 +100,7 @@ public class ProductOutboxWorker : BackgroundService
         {
             Url = this._schemaRegistryEndpoints
         };
-
+        
         if (!cancellationToken.IsCancellationRequested)
         {
             this._dbConnection = new LogicalReplicationConnection(this._connectionString);
@@ -120,65 +117,90 @@ public class ProductOutboxWorker : BackgroundService
         while (!cancellationToken.IsCancellationRequested)
         {
             var systemIdentification = await this._dbConnection.IdentifySystem(cancellationToken);
-            await foreach (var message in this._dbConnection.StartReplication(
-                               _products_outbox_slot,
-                               new PgOutputReplicationOptions("products_outbox_pub", 2)
-                               , cancellationToken))
+            var slot = new PgOutputReplicationSlot("products_outbox_slot");
+            var outputOptions = new PgOutputReplicationOptions("products_outbox_pub", 2);
+            await foreach (var message in this._dbConnection.StartReplication(slot, outputOptions, cancellationToken))
             {
-                if (message.GetType() == typeof(InsertMessage))
+                var indColumn = 0;
+                if (message is not InsertMessage insert)
                 {
-                    var insert = message as InsertMessage;
-                    var eventTimeProcessingMs = new DateTimeOffset(insert.ServerClock);
-                    var cols = new Dictionary<string, string>();
-                    var indCollumn = 0;
-                    var collumns = insert.NewRow.GetAsyncEnumerator(cancellationToken);
-                    
-                    while (await collumns.MoveNextAsync())
-                    {
-                        cols[insert.Relation.Columns[indCollumn++].ColumnName] = 
-                            await collumns.Current.Get<string>(cancellationToken);
-                    }
-                    
-                    var topicName = $@"ecommerce.{insert.Relation.Namespace}.{cols["aggregation_type"].ToLower()}";
-                    
-                    // var productCreatedSchema = (RecordSchema)RecordSchema
-                    //     .Parse(File.ReadAllText("../../deploy/productaggregate-schema.json"));
+                    continue;
+                }
 
-                    var headerId = new Header("eventId", Guid.Parse(cols["id"]).ToByteArray());
-                    var topicAggregationKey = cols["aggregate_id"];
-                    //body = new GenericRecord(productCreatedSchema);
-                    var body = new JsonObject
+                var eventTimeProcessingMs = new DateTimeOffset(insert.ServerClock);
+                var cols = new Dictionary<string, string>();
+                var columns = insert.NewRow.GetAsyncEnumerator(cancellationToken);
+                    
+                while (await columns.MoveNextAsync())
+                {
+                    cols[insert.Relation.Columns[indColumn++].ColumnName] = 
+                        await columns.Current.Get<string>(cancellationToken);
+                }
+                    
+                var topicName = $@"{insert.Relation.Namespace}.{cols["aggregation_type"].ToLower()}";
+                var headerId = new Header("eventId", Guid.Parse(cols["id"]).ToByteArray());
+                var topicAggregationKey = cols["aggregate_id"];
+                var payloadJson = JsonSerializer.Deserialize<JsonNode>(cols["event_data"]);
+                
+                var body = new ProductAggregate
+                {
+                    EventType = cols["event_type"],
+                    EventProcessingTimeMs = eventTimeProcessingMs.ToUnixTimeMilliseconds(),
+                };
+
+                switch (cols["event_type"])
+                {
+                    case nameof(ProductCreatedEvent):
+                        body.ProductCreated = new ProductCreatedEvent
+                        {
+                            Name = payloadJson["Name"].GetValue<string>(),
+                            Description = payloadJson["Description"].GetValue<string>(),
+                            Weight = payloadJson["Weight"].GetValue<double>(),
+                            EventTime = Timestamp.FromDateTimeOffset(
+                                DateTimeOffset.Parse(payloadJson["When"].GetValue<string>()))
+                        };
+                    break;
+                    case nameof(ProductUpdatedEvent):
+                        body.ProductUpdated = new ProductUpdatedEvent
+                        {
+                            Id = payloadJson["Id"].GetValue<string>(),
+                            Description = payloadJson["Description"].GetValue<string>(),
+                            Weight = payloadJson["Weight"].GetValue<double>(),
+                            EventTime = Timestamp.FromDateTimeOffset(
+                                DateTimeOffset.Parse(payloadJson["When"].GetValue<string>()))
+                        };
+                    break;
+                }
+                
+                using var schemaRegistry = new CachedSchemaRegistryClient(this._schemaRegistryConfig);
+                using var producer = new ProducerBuilder<string, ProductAggregate>(this._producerConfig)
+                    .SetValueSerializer(new ProtobufSerializer<ProductAggregate>(schemaRegistry))
+                    .Build();
+                try
+                {
+                    var outboxMessage = new Message<string, ProductAggregate>
                     {
-                        { "eventType", cols["event_type"] },
-                        { "eventProcessingTimeMs", eventTimeProcessingMs.ToUnixTimeMilliseconds() },
-                        { "payload", cols["event_data"] }
+                        Key = topicAggregationKey, 
+                        Value = body ,
+                        Headers = new Headers {headerId}
                     };
-
-                    using var schemaRegistry = new CachedSchemaRegistryClient(this._schemaRegistryConfig);
-                    using var producer =
-                        new ProducerBuilder<string, string>(this._producerConfig)
-                            // .SetValueSerializer(new AvroSerializer<GenericRecord>(schemaRegistry))
-                            // .SetValueSerializer(new JsonSerializer<JsonObject>(schemaRegistry))
-                            .Build();
-                    try
-                    {
-                        var outboxMessage = new Message<string, string> { Key = topicAggregationKey, Value = body.ToJsonString() ,Headers = new(){headerId}};
-                        var dr = await producer.ProduceAsync(topicName, outboxMessage,cancellationToken);
+                    var dr = await producer
+                        .ProduceAsync(topicName, outboxMessage,cancellationToken);
                         
-                        this._logger.LogInformation("New topic offset from published message: {0}", dr.TopicPartitionOffset);
+                    this._logger.LogInformation(message: "New topic offset from published message: {0}"
+                        , dr.TopicPartitionOffset);
                         
-                        // Always call SetReplicationStatus() or assign LastAppliedLsn and LastFlushedLsn individually
-                        // so that Npgsql can inform the server which WAL files can be removed/recycled.
-                        this._dbConnection.SetReplicationStatus(message.WalEnd);
-                    }
-                    catch (ProduceException<string, string> ex)
-                    {
-                        // In some cases (notably Schema Registry connectivity issues), the InnerException
-                        // of the ProduceException contains additional information pertaining to the root
-                        // cause of the problem. This information is automatically included in the output
-                        // of the ToString() method of the ProduceException, called implicitly in the below.
-                        this._logger.LogError("Publishing failed: {ex}", ex);
-                    }
+                    // Always call SetReplicationStatus() or assign LastAppliedLsn and LastFlushedLsn individually
+                    // so that Npgsql can inform the server which WAL files can be removed/recycled.
+                    this._dbConnection.SetReplicationStatus(insert.WalEnd);
+                }
+                catch (ProduceException<Guid, ProductAggregate> ex)
+                {
+                    // In some cases (notably Schema Registry connectivity issues), the InnerException
+                    // of the ProduceException contains additional information pertaining to the root
+                    // cause of the problem. This information is automatically included in the output
+                    // of the ToString() method of the ProduceException, called implicitly in the below.
+                    this._logger.LogError("Publishing failed: {ex}", ex);
                 }
             }
 

@@ -7,7 +7,6 @@
 using System.Collections.Immutable;
 using System.Text.Json;
 using Ecommerce.Domain;
-using Ecommerce.Domain.Aggregates;
 using Ecommerce.Persistence.State;
 using NodaTime;
 

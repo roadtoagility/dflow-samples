@@ -55,4 +55,10 @@ public class Product : EntityBase<ProductId>
         return From(ProductId.Empty, ProductName.Empty, ProductDescription.Empty
             , ProductWeight.Empty, VersionId.Empty());
     }
+
+    public static Product CombineDescriptionAndWeight(Product aggregateRootEntity, ProductDescription description, ProductWeight weight)
+    {
+        return From(aggregateRootEntity.Identity, aggregateRootEntity.Name, description, weight,
+            VersionId.Next(aggregateRootEntity.Version));
+    }
 }

@@ -21,6 +21,10 @@ public static class BusinessCollectionExtensions
             builder.On<ProductCreate>().PipelineAsync()
                 .Return<CommandResult, ProductCreateHandler>(
                     async (handler, request) => await handler.Execute(request));
+            
+            builder.On<ProductUpdate>().PipelineAsync()
+                .Return<CommandResult, ProductUpdateHandler>(
+                    async (handler, request) => await handler.Execute(request));
 
             builder.On<ProductList>().PipelineAsync()
                 .Return<Result<ProductView>, ProductListHandler>(

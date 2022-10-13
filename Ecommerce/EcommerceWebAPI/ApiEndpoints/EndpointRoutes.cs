@@ -7,6 +7,7 @@
 using DFlow.Business.Cqrs.CommandHandlers;
 using DFlow.Business.Cqrs.QueryHandlers;
 using Ecommerce.Business;
+using Ecommerce.Domain;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EcommerceWebAPI.ApiEndpoints;
@@ -28,6 +29,19 @@ public static class EndpointRoutes
             return Results.Ok(result);
         });
 
+        // app.MapPut("/api/v1/products/{productId:guid}", async (Guid productId, [FromBody] ProductUpdate command
+        //     , ICommandHandler<ProductUpdate, CommandResult> handler) =>
+        // {
+        //     var result = await handler.Execute(new ProductUpdate(productId, command.Description, command.Weight));
+        //
+        //     if (result.IsSucceed == false)
+        //     {
+        //         return Results.BadRequest(result.Violations);
+        //     }
+        //
+        //     return Results.Ok(result);
+        // });
+        
         app.MapGet("/api/v1/products", async (IQueryHandler<ProductList, Result<ProductView>> handler) =>
         {
             var result = await handler.Execute(new ProductList("", "", 1, 10));

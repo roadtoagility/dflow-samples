@@ -10,17 +10,9 @@ namespace Ecommerce.Domain.Events;
 
 // https://medium.com/the-sixt-india-blog/primitive-obsession-code-smell-that-hurt-people-the-most-5cbdd70496e9
 
-public sealed record ProductAggregate<TEvent>
+public class ProductUpdatedEvent : DomainEvent
 {
-    public string eventType { get; set; }
-    public long eventProcessingTimeMs { get; set; }
-    public TEvent payload { get; set; }
-}
-
-
-public class ProductCreatedEvent : DomainEvent
-{
-    public ProductCreatedEvent(ProductId id, ProductName name, ProductDescription description
+    public ProductUpdatedEvent(ProductId id, ProductName name, ProductDescription description
         , ProductWeight weight, DateTimeOffset when)
         : base(when)
     {
@@ -35,7 +27,7 @@ public class ProductCreatedEvent : DomainEvent
     public string Description { get; }
     public double Weight { get; }
 
-    public static ProductCreatedEvent For(Product product)
+    public static ProductUpdatedEvent For(Product product)
     {
         return new (
             product.Identity, 
