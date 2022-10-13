@@ -35,6 +35,7 @@ public static class BusinessCollectionExtensions
     public static void AddCommandHandlers(this IServiceCollection services)
     {
         services.AddScoped<ICommandHandler<ProductCreate, CommandResult>, ProductCreateHandler>();
+        services.AddScoped<ICommandHandler<ProductUpdate, CommandResult>, ProductUpdateHandler>();
         services.AddScoped<IQueryHandler<ProductList, Result<ProductView>>, ProductListHandler>();
     }
 }

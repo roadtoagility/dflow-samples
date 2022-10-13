@@ -46,7 +46,7 @@ public class ProductRepository : IProductRepository
                 throw new DbUpdateConcurrencyException("This version is not the most updated for this object.");
             }
 
-            this._dbContext.Entry(oldState).CurrentValues.SetValues(entry);
+            this._dbContext.Entry(oldState.ToProductState()).CurrentValues.SetValues(entry);
         }
         
         var outbox = entity.ToOutBox();
@@ -85,7 +85,7 @@ public class ProductRepository : IProductRepository
 
     public async Task<Product> GetById(ProductId id, CancellationToken cancellation)
     {
-        var result = await FindAsync(p => p.Id.Equals(id), cancellation);
+        var result = await FindAsync(p => p.Id.Equals(id.Value), cancellation);
 
         return result.Count == 0 ? Product.Empty() : result.First();
     }

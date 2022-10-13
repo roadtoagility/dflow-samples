@@ -29,18 +29,18 @@ public static class EndpointRoutes
             return Results.Ok(result);
         });
 
-        // app.MapPut("/api/v1/products/{productId:guid}", async (Guid productId, [FromBody] ProductUpdate command
-        //     , ICommandHandler<ProductUpdate, CommandResult> handler) =>
-        // {
-        //     var result = await handler.Execute(new ProductUpdate(productId, command.Description, command.Weight));
-        //
-        //     if (result.IsSucceed == false)
-        //     {
-        //         return Results.BadRequest(result.Violations);
-        //     }
-        //
-        //     return Results.Ok(result);
-        // });
+        app.MapPut("/api/v1/products/{productId:guid}", async (Guid productId, ProductUpdateDetail command
+            , ICommandHandler<ProductUpdate, CommandResult> handler) =>
+        {
+            var result = await handler.Execute(new ProductUpdate(productId, command.Description, command.Weight));
+        
+            if (result.IsSucceed == false)
+            {
+                return Results.BadRequest(result.Violations);
+            }
+        
+            return Results.Ok(result);
+        });
         
         app.MapGet("/api/v1/products", async (IQueryHandler<ProductList, Result<ProductView>> handler) =>
         {
