@@ -13,7 +13,7 @@ public sealed class ProductAggregationRoot : AggregationRootBase<Product, Produc
 
             if (product.IsNew())
             {
-                Raise(ProductUpdatedEvent.For(product));
+                Raise(ProductCreatedEvent.For(product));
             }
         }
         else
