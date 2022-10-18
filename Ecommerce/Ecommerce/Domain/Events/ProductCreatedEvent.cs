@@ -10,14 +10,6 @@ namespace Ecommerce.Domain.Events;
 
 // https://medium.com/the-sixt-india-blog/primitive-obsession-code-smell-that-hurt-people-the-most-5cbdd70496e9
 
-public sealed record ProductAggregate<TEvent>
-{
-    public string eventType { get; set; }
-    public long eventProcessingTimeMs { get; set; }
-    public TEvent payload { get; set; }
-}
-
-
 public class ProductCreatedEvent : DomainEvent
 {
     public ProductCreatedEvent(ProductId id, ProductName name, ProductDescription description

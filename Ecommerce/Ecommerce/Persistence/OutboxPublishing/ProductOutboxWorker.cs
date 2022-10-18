@@ -45,6 +45,8 @@ public class ProductOutboxWorker : OutboxWorkerBase
     public ProductOutboxWorker(ILogger<ProductOutboxWorker> logger, IConfiguration configuration)
     :base(logger, configuration)
     {
+        this._schemaRegistryEndpoints = configuration.GetSection("MessagingEndpoints:SchemaRegistry")!.Value;
+        this._brokerEndpoints = configuration.GetSection("MessagingEndpoints:Brokers")!.Value;
         this._logger = logger;
     }
     public override async Task StartAsync(CancellationToken cancellationToken)
@@ -106,20 +108,20 @@ public class ProductOutboxWorker : OutboxWorkerBase
                         body.ProductCreated = new ProductCreatedEvent
                         {
                             Name = payloadJson!["Name"]!.GetValue<string>(),
-                            Description = payloadJson["Description"]!.GetValue<string>(),
-                            Weight = payloadJson["Weight"]!.GetValue<double>(),
+                            Description = payloadJson!["Description"]!.GetValue<string>(),
+                            Weight = payloadJson!["Weight"]!.GetValue<double>(),
                             EventTime = Timestamp.FromDateTimeOffset(
-                                DateTimeOffset.Parse(payloadJson["When"].GetValue<string>()))
+                                DateTimeOffset.Parse(payloadJson!["When"]!.GetValue<string>()))
                         };
                     break;
                     case nameof(ProductUpdatedEvent):
                         body.ProductUpdated = new ProductUpdatedEvent
                         {
-                            Id = payloadJson["Id"].GetValue<string>(),
-                            Description = payloadJson["Description"].GetValue<string>(),
-                            Weight = payloadJson["Weight"].GetValue<double>(),
+                            Id = payloadJson!["Id"]!.GetValue<string>(),
+                            Description = payloadJson!["Description"]!.GetValue<string>(),
+                            Weight = payloadJson!["Weight"]!.GetValue<double>(),
                             EventTime = Timestamp.FromDateTimeOffset(
-                                DateTimeOffset.Parse(payloadJson["When"].GetValue<string>()))
+                                DateTimeOffset.Parse(payloadJson!["When"]!.GetValue<string>()))
                         };
                     break;
                 }

@@ -38,16 +38,10 @@ namespace Ecommerce.Persistence.OutboxPublishing;
 public abstract class OutboxWorkerBase : BackgroundService
 {
     private readonly ILogger _logger;
-    private readonly string _schemaRegistryEndpoints;
-    private readonly string _brokerEndpoints;
-    private SchemaRegistryConfig _schemaRegistryConfig = null!;
-    private ProducerConfig _producerConfig = null!;
-    private readonly string _connectionString;
+    protected readonly string _connectionString;
 
-    public OutboxWorkerBase(ILogger logger, IConfiguration configuration)
+    protected OutboxWorkerBase(ILogger logger, IConfiguration configuration)
     {
-        this._schemaRegistryEndpoints = configuration.GetSection("MessagingEndpoints:SchemaRegistry")!.Value;
-        this._brokerEndpoints = configuration.GetSection("MessagingEndpoints:Brokers")!.Value;
         this._connectionString = configuration.GetConnectionString("ModelConnection")!;
         this._logger = logger;
     }
