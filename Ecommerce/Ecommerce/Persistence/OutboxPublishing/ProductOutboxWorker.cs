@@ -35,62 +35,22 @@ namespace Ecommerce.Persistence.OutboxPublishing;
 
 // https://debezium.io/blog/2020/02/10/event-sourcing-vs-cdc/
 
-public class ProductOutboxWorker : BackgroundService
+public class ProductOutboxWorker : OutboxWorkerBase
 {
     private readonly ILogger _logger;
     private readonly string _schemaRegistryEndpoints;
     private readonly string _brokerEndpoints;
-    private SchemaRegistryConfig _schemaRegistryConfig;
-    private ProducerConfig _producerConfig;
-    private readonly string _connectionString;
-    private LogicalReplicationConnection _dbConnection;
-
+    private SchemaRegistryConfig _schemaRegistryConfig = null!;
+    private ProducerConfig _producerConfig = null!;
     public ProductOutboxWorker(ILogger<ProductOutboxWorker> logger, IConfiguration configuration)
+    :base(logger, configuration)
     {
-        this._schemaRegistryEndpoints = configuration.GetSection("MessagingEndpoints:SchemaRegistry").Value;
-        this._brokerEndpoints = configuration.GetSection("MessagingEndpoints:Brokers").Value;
-        this._connectionString = configuration.GetConnectionString("ModelConnection");
+        this._schemaRegistryEndpoints = configuration.GetSection("MessagingEndpoints:SchemaRegistry")!.Value;
+        this._brokerEndpoints = configuration.GetSection("MessagingEndpoints:Brokers")!.Value;
         this._logger = logger;
     }
-
-    public async Task PrepareLogicalReplicationAsync(CancellationToken cancellationToken)
-    {
-        var conn = new NpgsqlConnection(this._connectionString);
-        await conn.OpenAsync(cancellationToken);
-
-        await using var checkPublication =
-            new NpgsqlCommand("select exists(select 1 from pg_publication where pubname = @pubName)", conn);
-        checkPublication.Parameters.Add(new NpgsqlParameter<string>("pubName", "products_outbox_pub"));
-        await checkPublication.PrepareAsync(cancellationToken);
-        var hasPublication = (bool) await checkPublication.ExecuteScalarAsync(cancellationToken);
-
-        if (hasPublication == false)
-        {
-            string insertPub = "CREATE PUBLICATION products_outbox_pub FOR TABLE products_outbox WITH (publish = 'insert')"; 
-            await using var insertPublication = new NpgsqlCommand(insertPub, conn);
-            await insertPublication.PrepareAsync(cancellationToken);
-            await insertPublication.ExecuteNonQueryAsync(cancellationToken);
-        }
-        
-        await using var checkSlotReplication = new NpgsqlCommand("select exists(select 1 from pg_replication_slots where slot_name = @slotName)",conn);
-        checkSlotReplication.Parameters.Add(new NpgsqlParameter<string>("slotName", "products_outbox_slot"));
-        await checkSlotReplication.PrepareAsync(cancellationToken);
-        var hasSlot = (bool) await checkSlotReplication.ExecuteScalarAsync(cancellationToken);
-
-        if (hasSlot == false)
-        {
-            await using var createSlot =
-                new NpgsqlCommand("SELECT * FROM pg_create_logical_replication_slot( @slotName, 'pgoutput')", conn);
-            createSlot.Parameters.Add(new NpgsqlParameter<string>("slotName", "products_outbox_slot"));
-            await createSlot.PrepareAsync(cancellationToken);
-            await createSlot.ExecuteNonQueryAsync(cancellationToken);            
-        }
-    }
-
     public override async Task StartAsync(CancellationToken cancellationToken)
     {
-        await PrepareLogicalReplicationAsync(cancellationToken);
-        
         this._producerConfig = new ProducerConfig()
         {
             BootstrapServers = this._brokerEndpoints
@@ -100,15 +60,7 @@ public class ProductOutboxWorker : BackgroundService
         {
             Url = this._schemaRegistryEndpoints
         };
-        
-        if (!cancellationToken.IsCancellationRequested)
-        {
-            this._dbConnection = new LogicalReplicationConnection(this._connectionString);
-            await this._dbConnection.Open(cancellationToken);
-        }
-        
-        var con = new NpgsqlConnection(this._connectionString).OpenAsync(cancellationToken);
-        
+
         await base.StartAsync(cancellationToken);
     }
 
@@ -116,10 +68,12 @@ public class ProductOutboxWorker : BackgroundService
     {
         while (!cancellationToken.IsCancellationRequested)
         {
-            var systemIdentification = await this._dbConnection.IdentifySystem(cancellationToken);
+            await using var dbConnection = new LogicalReplicationConnection(this._connectionString);
+            await dbConnection.Open(cancellationToken);
+
             var slot = new PgOutputReplicationSlot("products_outbox_slot");
             var outputOptions = new PgOutputReplicationOptions("products_outbox_pub", 2);
-            await foreach (var message in this._dbConnection.StartReplication(slot, outputOptions, cancellationToken))
+            await foreach (var message in dbConnection.StartReplication(slot, outputOptions, cancellationToken))
             {
                 var indColumn = 0;
                 if (message is not InsertMessage insert)
@@ -153,21 +107,21 @@ public class ProductOutboxWorker : BackgroundService
                     case nameof(ProductCreatedEvent):
                         body.ProductCreated = new ProductCreatedEvent
                         {
-                            Name = payloadJson["Name"].GetValue<string>(),
-                            Description = payloadJson["Description"].GetValue<string>(),
-                            Weight = payloadJson["Weight"].GetValue<double>(),
+                            Name = payloadJson!["Name"]!.GetValue<string>(),
+                            Description = payloadJson!["Description"]!.GetValue<string>(),
+                            Weight = payloadJson!["Weight"]!.GetValue<double>(),
                             EventTime = Timestamp.FromDateTimeOffset(
-                                DateTimeOffset.Parse(payloadJson["When"].GetValue<string>()))
+                                DateTimeOffset.Parse(payloadJson!["When"]!.GetValue<string>()))
                         };
                     break;
                     case nameof(ProductUpdatedEvent):
                         body.ProductUpdated = new ProductUpdatedEvent
                         {
-                            Id = payloadJson["Id"].GetValue<string>(),
-                            Description = payloadJson["Description"].GetValue<string>(),
-                            Weight = payloadJson["Weight"].GetValue<double>(),
+                            Id = payloadJson!["Id"]!.GetValue<string>(),
+                            Description = payloadJson!["Description"]!.GetValue<string>(),
+                            Weight = payloadJson!["Weight"]!.GetValue<double>(),
                             EventTime = Timestamp.FromDateTimeOffset(
-                                DateTimeOffset.Parse(payloadJson["When"].GetValue<string>()))
+                                DateTimeOffset.Parse(payloadJson!["When"]!.GetValue<string>()))
                         };
                     break;
                 }
@@ -192,7 +146,7 @@ public class ProductOutboxWorker : BackgroundService
                         
                     // Always call SetReplicationStatus() or assign LastAppliedLsn and LastFlushedLsn individually
                     // so that Npgsql can inform the server which WAL files can be removed/recycled.
-                    this._dbConnection.SetReplicationStatus(insert.WalEnd);
+                    dbConnection.SetReplicationStatus(insert.WalEnd);
                 }
                 catch (ProduceException<Guid, ProductAggregate> ex)
                 {
