@@ -6,11 +6,11 @@ import "product-event-updated.proto";
 option csharp_namespace = "Ecommerce.Domain.Events.Exported";
 
 message ProductAggregate {
-    string eventType = 1;
-    int64 eventProcessingTimeMs = 2;
+    string event_type = 1;
+    int64 event_processing_time_ms = 2;
 
     oneof result {
-        ProductCreatedEvent productCreated = 3;
-        ProductUpdatedEvent productUpdated = 4;
+        ProductCreatedEvent product_created = 3;
+        ProductUpdatedEvent product_updated = 4;
     }
 }
