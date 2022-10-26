@@ -5,6 +5,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using DFlow.Persistence;
+using Ecommerce.Persistence.InboxPublishing;
 using Ecommerce.Persistence.OutboxPublishing;
 using Ecommerce.Persistence.Repositories;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,6 +22,7 @@ public static class PersistenceDependencyInjections
     
     public static void AddWorkers(this IServiceCollection services)
     {
+        services.AddHostedService<ProductInboxWorker>();
         services.AddHostedService<ProductOutboxWorker>();
     }
 }
