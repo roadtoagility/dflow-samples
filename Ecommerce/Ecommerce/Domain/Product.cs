@@ -9,7 +9,7 @@ using DFlow.Domain.Events;
 
 namespace Ecommerce.Domain;
 
-public class Product : EntityBase<ProductId>
+public sealed class Product : EntityBase<ProductId>
 {
     public Product(ProductId identity, ProductName name, ProductDescription description, ProductWeight weight,
         VersionId version)

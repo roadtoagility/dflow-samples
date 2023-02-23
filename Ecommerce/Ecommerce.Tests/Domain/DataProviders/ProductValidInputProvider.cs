@@ -14,8 +14,9 @@ namespace Ecommerce.Tests.Domain.DataProviders;
 
 public class ProductValidInputProvider : IEnumerable<object[]>
 {
+    static ProductId productId = ProductId.From(Guid.NewGuid());
     private static readonly Product product = Product.From(
-        ProductId.From(Guid.NewGuid()),
+        productId,
         ProductName.From("name"),
         ProductDescription.From("descrição"),
         ProductWeight.From(1.0f),
@@ -26,7 +27,7 @@ public class ProductValidInputProvider : IEnumerable<object[]>
     {
         new object[]
         {
-            ProductId.From(Guid.NewGuid()), ProductName.From("name"), ProductDescription.From("descrição"),
+            productId, ProductName.From("name"), ProductDescription.From("descrição"),
             ProductWeight.From(1.0f), VersionId.From(1), product
         }
     };

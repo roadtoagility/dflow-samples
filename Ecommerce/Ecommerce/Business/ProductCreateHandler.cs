@@ -4,13 +4,13 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+using System.Collections.Immutable;
 using DFlow.Business.Cqrs.CommandHandlers;
 using DFlow.Persistence;
 using Ecommerce.Business.Extensions;
 using Ecommerce.Domain;
 using Ecommerce.Domain.Aggregates;
 using Ecommerce.Persistence.Repositories;
-using Microsoft.VisualBasic;
 
 namespace Ecommerce.Business;
 
@@ -33,7 +33,6 @@ public sealed class ProductCreateHandler : ICommandHandler<ProductCreate, Comman
         var aggregate = ProductAggregationRoot.Create(ProductName.From(command.Name),
             ProductDescription.From(command.Description),
             ProductWeight.From(command.Weight));
-
         if (aggregate.IsValid)
         {
             await this._sessionDb.Repository.Add(aggregate.GetChange());
