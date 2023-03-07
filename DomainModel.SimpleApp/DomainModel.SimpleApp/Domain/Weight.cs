@@ -1,18 +1,16 @@
 // // Copyright (C) 2023  Road to Agility
 
 using DFlow.BusinessObjects;
-using DFlow.Domain.Validation;
+using DFlow.Validation;
 
 namespace DomainModel.SimpleApp.Domain;
 
-public class Weight: DFlow.Domain.BusinessObjects.ValueOf<double, Weight>
+public class Weight: ValueOf<double, Weight>
 {
     protected override void Validate()
     {
         if (Value < 0)
         {
-            // throw new ArgumentException("O Peso não pode ser negativo",
-            //     nameof(Weight));
             ValidationStatus.Append(Failure.For("Weight",""));
         }
     }
