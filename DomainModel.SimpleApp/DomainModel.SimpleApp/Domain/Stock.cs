@@ -4,9 +4,9 @@ using DFlow.BusinessObjects;
 
 namespace DomainModel.SimpleApp.Domain;
 
-public class Product: EntityBase<ProductName>
+public class Stock: EntityBase<ProductName>
 {
-    public Product(ProductName identity, Description description, 
+    public Stock(ProductName identity, Description description, 
         Weight weight, VersionId version) 
         : base(identity, version)
     {
@@ -19,7 +19,7 @@ public class Product: EntityBase<ProductName>
     }
 
     public Weight Weight { get; }
-    public Description Description { get; private set; }
+    public Description Description { get; }
     
     protected override IEnumerable<object> GetEqualityComponents()
     {
@@ -27,22 +27,12 @@ public class Product: EntityBase<ProductName>
         yield return Weight;
     }
     
-    public void UpdateDescription(Description newDescription)
-    {
-        if (newDescription.ValidationStatus.IsValid)
-        {
-            Description = newDescription;            
-        }
-        
-        AppendValidationResult(newDescription.ValidationStatus.Failures);
-    }
-    
-    public static Product From(ProductName name, Weight weight, 
+    public static Stock From(ProductName name, Weight weight, 
         Description descr, VersionId versionId)
     {
-        return new Product(name,descr,weight,versionId);
+        return new Stock(name,descr,weight,versionId);
     }
-    public static Product New(string name, double weight, string descr)
+    public static Stock New(string name, double weight, string descr)
     {
         return From(ProductName.From(name),
             Weight.From(weight),
@@ -50,7 +40,7 @@ public class Product: EntityBase<ProductName>
             VersionId.New());
     }
 
-    public static Product NameUpdate(Product product,
+    public static Stock NameUpdate(Product product,
         ProductName newName)
     {
         return From(newName,
