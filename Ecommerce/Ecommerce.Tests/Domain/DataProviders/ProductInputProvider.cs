@@ -12,23 +12,13 @@ using Ecommerce.Domain;
 
 namespace Ecommerce.Tests.Domain.DataProviders;
 
-public class ProductValidInputProvider : IEnumerable<object[]>
+public class ProductInputProvider : IEnumerable<object[]>
 {
-    static readonly ProductId productId = ProductId.From(Guid.NewGuid());
-    private static readonly Product product = Product.From(
-        productId,
-        ProductName.From("name"),
-        ProductDescription.From("descrição"),
-        ProductWeight.From(1.0f),
-        VersionId.From(1)
-    );
-
     private readonly List<object[]> _data = new()
     {
         new object[]
         {
-            productId, ProductName.From("name"), ProductDescription.From("descrição"),
-            ProductWeight.From(1.0f), VersionId.From(1), product
+            "descrição","name",1.0f, true
         }
     };
 

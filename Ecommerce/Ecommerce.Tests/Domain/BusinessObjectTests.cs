@@ -14,18 +14,18 @@ public class BusinessObjectTests
 {
     [Theory]
     [ClassData(typeof(ProductNameValidInputProvider))]
-    public void CreateValidProductName(string input, ProductName expected)
+    public void CreateValidProductName(string input, bool expected)
     {
         var name = ProductName.From(input);
-        Assert.Equal(expected, name);
+        Assert.Equal(expected, name.ValidationStatus.IsValid);
     }
 
     [Theory]
     [ClassData(typeof(ProductNameInvalidInputProvider))]
-    public void CreateInvalidProductName(string input, ProductName expected)
+    public void CreateInvalidProductName(string input, bool expected)
     {
         var name = ProductName.From(input);
-        Assert.Equal(expected, name);
+        Assert.Equal(expected, name.ValidationStatus.IsValid);
     }
 
     [Theory]
@@ -46,17 +46,17 @@ public class BusinessObjectTests
 
     [Theory]
     [ClassData(typeof(ProductDescriptionValidInputProvider))]
-    public void CreateValidDescription(float input, ProductWeight expected)
+    public void CreateValidDescription(string input, bool expected)
     {
-        var name = ProductWeight.From(input);
-        Assert.Equal(expected, name);
+        var name = ProductDescription.From(input);
+        Assert.Equal(expected, name.ValidationStatus.IsValid);
     }
 
     [Theory]
     [ClassData(typeof(ProductDescriptionInvalidInputProvider))]
-    public void CreateInvalidDescription(string input, ProductDescription expected)
+    public void CreateInvalidDescription(string input, bool expected)
     {
         var name = ProductDescription.From(input);
-        Assert.Equal(expected, name);
+        Assert.Equal(expected, name.ValidationStatus.IsValid);
     }
 }

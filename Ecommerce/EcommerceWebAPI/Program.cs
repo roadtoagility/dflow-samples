@@ -20,8 +20,7 @@ builder.Services.AddDbContext<EcommerceAppDbContext>(options =>
         o => o.UseNodaTime()));
 
 builder.Services.AddRepositories();
-builder.Services.AddCommandHandlers();
-builder.Services.AddMediatorOperations();
+builder.Services.AddHandlers();
 builder.Services.AddWorkers();
 
 

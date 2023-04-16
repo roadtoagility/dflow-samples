@@ -11,7 +11,7 @@ namespace Ecommerce.Tests.Domain.DataProviders;
 
 public class ProductNameInvalidInputProvider : IEnumerable<object[]>
 {
-    private readonly List<object[]> _data = new() { new object[] { "My Todos", false } };
+    private readonly List<object[]> _data = new() { new object[] { "", false } };
 
     public IEnumerator<object[]> GetEnumerator()
     {
