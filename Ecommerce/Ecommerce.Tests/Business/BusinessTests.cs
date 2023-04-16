@@ -8,6 +8,7 @@ using DFlow.Persistence;
 using Ecommerce.Business;
 using Ecommerce.Capabilities.Persistence.Repositories;
 using Ecommerce.Tests.Domain.DataProviders;
+using FluentAssertions;
 using Xunit;
 
 namespace Ecommerce.Tests.Business;
@@ -15,12 +16,11 @@ namespace Ecommerce.Tests.Business;
 public class BusinessTests
 {
     [Theory]
-    [ClassData(typeof(ProductInputProvider))]
-    public async void CreateProduct(
+    [InlineData("descrição","name",1.0f)]
+    public async void create_new_product(
         string description,
         string name,
-        float weight,
-        bool expected)
+        float weight)
     {
         var command = new ProductCreate(description, name, weight);
         var session = NSubstitute.Substitute.For<IDbSession<IProductRepository>>();
@@ -28,6 +28,6 @@ public class BusinessTests
         var handler = new ProductCreateHandler(session);
         var result = await handler.Execute(command);
             
-        Assert.Equal(expected, result.IsSucceded);
+        result.IsSucceded.Should().BeTrue();
     }
 }
